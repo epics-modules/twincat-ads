@@ -3,4 +3,4 @@
 	url = https://bitbucket.org/europeanspallationsource/tc_ads_example
 [submodule "BeckhoffADS"]
 	path = BeckhoffADS
-	url = https://github.com/EuropeanSpallationSource/ADS
+	url = https://github.com/Beckhoff/ADS
