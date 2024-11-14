@@ -8,8 +8,6 @@
 #    You should have received a copy of the GNU Lesser General Public License along with epics-twincat-ads. If not, see <https://www.gnu.org/licenses/>.
 #
 # Makefile when running gnu make
-# If ESS EPICS ENVIRONMENT is set up, Makefile.EEE is used
-# Otherwise use Makefile
 
 ADS_FROM_BECKHOFF_SOURCES = \
   BeckhoffADS/AdsLib/AdsDef.cpp \
@@ -41,18 +39,6 @@ cleanadssources:
 adsApp/src/ADS_FROM_BECKHOFF_SUPPORTSOURCES.mak: Makefile
 	${PWD}/tools/downloadADS.sh build ${ADS_FROM_BECKHOFF_SOURCES}
 
-ifdef EPICS_ENV_PATH
-ifeq ($(EPICS_MODULES_PATH),/opt/epics/modules)
-ifeq ($(EPICS_BASES_PATH),/opt/epics/bases)
-include Makefile.EEE
-else
 include Makefile.epics
-endif
-else
-include Makefile.epics
-endif
-else
-include Makefile.epics
-endif
 
 .PHONY: checkws
