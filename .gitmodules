@@ -1,6 +1,3 @@
-[submodule "TwinCATexample"]
-	path = TwinCATexample
-	url = https://bitbucket.org/europeanspallationsource/tc_ads_example
 [submodule "BeckhoffADS"]
 	path = BeckhoffADS
 	url = https://github.com/Beckhoff/ADS
