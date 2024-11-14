@@ -1,4 +1,4 @@
-# EPICS Module to communicate with TwinCAT controllers over ADS protocol.
+# EPICS Module to communicate with TwinCAT controllers over ADS protocol
 
 Originally developed for use with ESS EPICS Environment, but can also be compiled
 for normal EPICS base.
@@ -14,27 +14,31 @@ $ iocsh adsMotorRecord.cmd
 $ iocsh.bash adsMotorRecordOnly.cmd
 ```
 
-## Add route issue with TwinCAT version 3.1 XAE 4024
-See issue: https://github.com/Beckhoff/ADS/issues/98
+## Prepare communication between IOC and TwinCAT Controller
+To enable communication between the IOC and TwinCAT Controller, an ADS route needs to be setup. This can be done in at least three different ways:
 
-For TwinCAT release 4024 the ADS route needs to be added manually (dialog not working) by adding: 
-```
-		<Route>
-			<Name>epics</Name>
-			<Address>192.168.114.129</Address>
-			<NetId>192.168.114.129.1.1</NetId>
-			<Type>TCP_IP</Type>
-			<Flags>32</Flags>
-		</Route>
-```
-Note: Update with correct address and NetId..
+1. Login to the PLC remotely. Click on the TwinCAT runtime icon (in the field by the Windows clock) -> Router -> Edit Routes. Add the route through the popup window.
 
-to the static route file on the target cpu:
-```
-C:\TwinCAT\3.1\Target\StaticRoutes.xml 
-```
+2. Login to the PLC remotely. Edit the C:\TwinCAT\3.1\Target\StaticRoutes.xml manually.
+	```
+	<Route>
+		<Name>epics</Name>
+		<Address>192.168.114.129</Address>
+		<NetId>192.168.114.129.1.1</NetId>
+		<Type>TCP_IP</Type>
+		<Flags>32</Flags>
+	</Route>
+	```
+	*Note 1: Update with the correct IP address and AMSNETID.*
 
-# This file is part of epics-twincat-ads.
+	*Note 2: for TwincCAT 4024.0, this is the required method (see https://github.com/Beckhoff/ADS/issues/98).*
+
+3. Use TwinCAT XAE. Click Solution -> SYSTEM -> Routes and add the route through the popup window.
+
+
+
+
+## License information
 
 epics-twincat-ads is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
