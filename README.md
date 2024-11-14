@@ -25,8 +25,6 @@ iocsh.bash adsOnlyIO.cmd
 iocsh.bash adsMotorRecord.cmd
 iocsh.bash adsMotorRecordOnly.cmd
 
-Contact: anders.sandstrom@esss.se
-
 ## Add route issue with TwinCAT version 3.1 XAE 4024
 See issue: https://github.com/Beckhoff/ADS/issues/98
 
