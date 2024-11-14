@@ -705,20 +705,8 @@ int octetCreateArgvSepv(const char *line,
   }
   /* argv[0] is the whole line */
   {
-//    size_t line_len = strlen(input_line);
     argv[argc] = strdup(input_line);
     sepv[argc] = (char*)calloc(1, MAX_SEPARATORS);
-
-//    if (argv0_semicolon_is_sep &&
-//        (line_len > 1) && (input_line[line_len-1] == ';')) {
-//      /* Special: the last character is ; move it from
-//         input line into the separator */
-//      char *sep = (char *)sepv[argc];
-//      sep[0] = ';';
-//      sep = (char *)&argv[argc][line_len-1];
-//      sep[0] = '\0';
-//    }
-
   }
   if (!strlen(input_line)) {
     return argc;
@@ -769,20 +757,6 @@ int octetCreateArgvSepv(const char *line,
   }
 
   free(input_line);
-
-//  if (PRINT_STDOUT_BIT2()) {
-//    int i;
-//    /****  Print what we have */
-//    fprintf(stdout, "%s/%s:%d argc=%d calloc_len=%u\n",
-//            __FILE__, __FUNCTION__, __LINE__,
-//            argc, (unsigned)calloc_len);
-//    for(i=0; i <= argc;i++) {
-//      fprintf(stdout, "%s/%s:%d argv[%d]=\"%s\" sepv[%d]=\"%s\"\n",
-//              __FILE__, __FUNCTION__, __LINE__,
-//              i, argv[i] ? argv[i] : "NULL",
-//              i, sepv[i] ? sepv[i] : "NULL");
-//    }
-//  }
 
   return argc;
 }
