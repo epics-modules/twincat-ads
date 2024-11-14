@@ -7,8 +7,6 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License along with epics-twincat-ads. If not, see <https://www.gnu.org/licenses/>.
 #
-require ads,2.0.2
-require EthercatMC 3.0.2
 
 ##############################################################################
 # Demo file to run one motor record axis (or actually axis record).

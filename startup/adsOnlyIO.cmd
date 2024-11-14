@@ -7,7 +7,6 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License along with epics-twincat-ads. If not, see <https://www.gnu.org/licenses/>.
 #
-require ads,2.0.2
 
 ##############################################################################
 # Demo file to link an EPICS IOC with some I/O in a TwinCAT plc
