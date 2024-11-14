@@ -8,6 +8,4 @@
 #    You should have received a copy of the GNU Lesser General Public License along with epics-twincat-ads. If not, see <https://www.gnu.org/licenses/>.
 #
 
-
-DB += adsTestOctet.db
 DB += adsTestAsyn.db
