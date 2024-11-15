@@ -403,14 +403,15 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName,
       uint16_t adsState = 0;
       if (adsReadStateLock(amsport,&adsState,true,&error) != asynSuccess) {
           asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                    "%s:%s: adsReadStateLock failed for port %s.\n",
-                    driverName, functionName, portName);
+                    "%s:%s: adsReadStateLock failed for port '%s' error=0x%lx\n",
+                    driverName, functionName, portName, error);
           disconnect(pasynUserSelf);
+          epicsThreadSleep(10.0);
           continue;
       }
       if (adsState == ADSSTATE_RUN) {
           asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                    "%s:%s: connection established for port %s.\n",
+                    "%s:%s: connection established for port '%s'\n",
                     driverName, functionName, portName);
           return;
       }
