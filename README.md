@@ -4,7 +4,7 @@ Originally developed for use with ESS EPICS Environment, but can also be compile
 for normal EPICS base.
 
 ```
-$ git clone --recursive https://github.com/epics-modules/epics-twincat-ads
+$ git clone --recursive https://github.com/epics-modules/twincat-ads
 ```
 
 Start an e3 ioc with:
