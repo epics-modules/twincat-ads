@@ -703,7 +703,7 @@ void adsAsynPortDriver::report(FILE *fp, int details)
       fprintf(fp,"    Param type:                %s (%d)\n",asynTypeToString((long)paramInfo->asynType),paramInfo->asynType);
       fprintf(fp,"    Param sample time [ms]:    %lf\n",paramInfo->sampleTimeMS);
       fprintf(fp,"    Param max delay time [ms]: %lf\n",paramInfo->maxDelayTimeMS);
-      fprintf(fp,"    Param isIOIntr:            %s\n",paramInfo->isIOIntr ? "true" : "false");
+      fprintf(fp,"    Param hasInput:            %s\n",paramInfo->hasInput ? "true" : "false");
       fprintf(fp,"    Param asyn addr:           %d\n",paramInfo->asynAddr);
       fprintf(fp,"    Param time source:         %s\n",(paramInfo->timeBase==ADS_TIME_BASE_PLC) ? ADS_OPTION_TIMEBASE_PLC : ADS_OPTION_TIMEBASE_EPICS);
       fprintf(fp,"    Param plc time:            %us:%uns\n",paramInfo->plcTimeStamp.secPastEpoch,paramInfo->plcTimeStamp.nsec);
@@ -1154,7 +1154,7 @@ asynStatus adsAsynPortDriver::updateParamInfoWithPLCInfo(adsParamInfo *paramInfo
       }
   }
 
-  if(paramInfo->isIOIntr){
+  if(paramInfo->hasInput){
       /* If it's not a bulk read or if it's really big, just subscribe to it! */
       if (!paramInfo->isBulkRead || paramInfo->plcSize > 1024*1024) {
           adsDelDataCallback(paramInfo,true);   //try to delete
@@ -1443,15 +1443,15 @@ asynStatus adsAsynPortDriver::parsePlcInfofromDrvInfo(const char* drvInfo,adsPar
   asynPrint(pasynUserSelf,ASYN_TRACE_FLOW, "%s:%s: drvInfo: %s\n", driverName, functionName,drvInfo);
 
   //Check if input or output
-  paramInfo->isIOIntr=false;
+  paramInfo->hasInput=false;
   const char* temp=strrchr(drvInfo,'?');
   if(temp){
     if(strlen(temp)==1){
-      paramInfo->isIOIntr=true; //All inputs will be created I/O intr
+      paramInfo->hasInput=true; //Inputs or Outputs with readback
     }
   }
 
-  asynPrint(pasynUserSelf,ASYN_TRACE_FLOW, "%s:%s: drvInfo %s is %s\n", driverName, functionName,drvInfo,paramInfo->isIOIntr ? "I/O Intr (end with ?)": " not I/O Intr (end with =)");
+  asynPrint(pasynUserSelf,ASYN_TRACE_FLOW, "%s:%s: drvInfo %s is %s\n", driverName, functionName,drvInfo,paramInfo->hasInput ? "has Input (end with ?)": "output (end with =)");
 
   //take part after last "/" if option or complete string..
   char buffer[ADS_MAX_FIELD_CHAR_LENGTH];
