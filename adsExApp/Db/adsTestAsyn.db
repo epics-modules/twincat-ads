@@ -9,7 +9,8 @@
 #
 ###############################################################################
 # fAmplitude: Three different types:
-#             1. ao with readback  (I/O intr)
+#             1a. ao with readback  (I/O intr)
+#             1b. ao with readback  (polled with 1 Hz)
 #             2. ao without readback
 #             3  ai I/O intr
 
@@ -18,6 +19,17 @@ record(ao,"$(P)SetFAmplitudeRB"){
     field(TSE,  "-2")
     field(DTYP, "asynFloat64")
     field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/Main.fAmplitude?")
+    field(PREC, "3")
+    field(SCAN, "Passive")
+
+    info(asyn:READBACK,"1")
+}
+
+record(ao,"$(P)SetFAmplitudeRB"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/POLL_RATE=1.0/Main.fAmplitude?")
     field(PREC, "3")
     field(SCAN, "Passive")
 
@@ -81,15 +93,28 @@ record(stringin, "$(P)GetFTestPLCTime:T") {
 
 ###############################################################################
 # bEnableUpdateSine: Three different types:
-#             1. ao with readback  (I/O intr)
-#             2. ao without readback
-#             3  ai I/O intr
+#             1a. bo with readback  (I/O intr)
+#             1b. bo with readback  (polled with 1 Hz)
+#             2. bo without readback
+#             3  bi I/O intr
 
 record(bo,"$(P)SetBEnableUpdateSineRB"){
     field(PINI, "1")
     field(TSE,  "-2")
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/Main.bEnableUpdateSine?")
+    field(SCAN, "Passive")
+    field(ZNAM, "Zero")
+    field(ONAM, "One")
+
+    info(asyn:READBACK,"1")
+}
+
+record(bo,"$(P)SetBEnableUpdateSineRB"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/POLL_RATE=1.0/Main.bEnableUpdateSine?")
     field(SCAN, "Passive")
     field(ZNAM, "Zero")
     field(ONAM, "One")
