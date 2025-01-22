@@ -327,6 +327,22 @@ record(waveform,"$(P)GetInt8Array"){
 }
 
 ###############################################################################
+# Int32Array:
+# ADS type: DINT
+
+record(waveform, "$(P):Int32Array"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynInt32ArrayOut")
+    field(INP,  "@asyn($(ADSCLIENT),0,1)ADSPORT=$(ADSSERVER_PORT)/Main.Int32Array?")
+    field(NELM, "100")
+    field(SCAN, "PASSIVE")
+    field(FTVL, "LONG")
+
+    info(asyn:READBACK,"1")
+}
+
+###############################################################################
 # Ams port state: Read and write
 
 record(ai,"$(P)GetAmsPort851State"){
