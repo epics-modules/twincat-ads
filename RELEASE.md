@@ -1,4 +1,4 @@
-# epics-twincat-ads
+# twincat-ads
 
 ## Release v2.1.0 (2020-01-23)
 - Integrate changes from SLAC, be "on par" with the source code, more or less
