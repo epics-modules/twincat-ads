@@ -70,7 +70,7 @@ typedef struct adsParamInfo{
   char           *drvInfo;
   asynParamType  asynType;
   int            asynAddr;
-  bool           isIOIntr;
+  bool           hasInput;
   double         sampleTimeMS;  //milli seconds
   double         maxDelayTimeMS;  //milli seconds
   uint16_t       amsPort;
