@@ -1,5 +1,11 @@
 # twincat-ads
 
+
+## Release v2.1.1 (2025-09-02)
+- Bugfix: Remove invalid adsUnlock()
+- Add licence information for LGPL v3
+- Improvements after a code review at ESS:
+    Lots of cleanup. Improved documentation
 ## Release v2.1.0 (2020-01-23)
 - Integrate changes from SLAC, be "on par" with the source code, more or less
   - New features:
