@@ -15,13 +15,15 @@ include $(TOP)/configure/CONFIG
 #=============================
 
 USR_CXXFLAGS += -std=c++11
+USR_CXXFLAGS += -DCONFIG_DEFAULT_LOGLEVEL=1
 USR_CPPFLAGS += -I ../../../BeckhoffADS/AdsLib/
+USR_CPPFLAGS += -I ../../../BeckhoffADS/AdsLib/bhf/
 USR_LDFLAGS  += -lpthread
 
 #=============================
 # Build the IOC application
 
-LIBRARY_IOC = ads
+#LIBRARY_IOC = ads
 
 DBD += ads.dbd
 

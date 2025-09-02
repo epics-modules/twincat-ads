@@ -10,16 +10,33 @@
 # Makefile when running gnu make
 
 ADS_FROM_BECKHOFF_SOURCES = \
-  BeckhoffADS/AdsLib/AdsDef.cpp \
-  BeckhoffADS/AdsLib/AdsLib.cpp \
-  BeckhoffADS/AdsLib/AmsConnection.cpp \
-  BeckhoffADS/AdsLib/AmsPort.cpp \
-  BeckhoffADS/AdsLib/AmsRouter.cpp \
-  BeckhoffADS/AdsLib/Log.cpp \
-  BeckhoffADS/AdsLib/NotificationDispatcher.cpp \
-  BeckhoffADS/AdsLib/Sockets.cpp \
-  BeckhoffADS/AdsLib/Frame.cpp \
+BeckhoffADS/example/example.cpp \
+BeckhoffADS/AdsLib/Log.cpp \
+BeckhoffADS/AdsLib/Frame.cpp \
+BeckhoffADS/AdsLib/standalone/AmsRouter.cpp \
+BeckhoffADS/AdsLib/standalone/AdsLib.cpp \
+BeckhoffADS/AdsLib/standalone/NotificationDispatcher.cpp \
+BeckhoffADS/AdsLib/standalone/AmsPort.cpp \
+BeckhoffADS/AdsLib/standalone/AmsConnection.cpp \
+BeckhoffADS/AdsLib/standalone/AmsNetId.cpp \
+BeckhoffADS/AdsLib/AdsFile.cpp \
+BeckhoffADS/AdsLib/TwinCAT/AdsLib.cpp \
+BeckhoffADS/AdsLib/AdsLib.cpp \
+BeckhoffADS/AdsLib/LicenseAccess.cpp \
+BeckhoffADS/AdsLib/RTimeAccess.cpp \
+BeckhoffADS/AdsLib/Sockets.cpp \
+BeckhoffADS/AdsLib/AdsDef.cpp \
+BeckhoffADS/AdsLib/RegistryAccess.cpp \
+BeckhoffADS/AdsLib/SymbolAccess.cpp \
+BeckhoffADS/AdsLib/bhf/ParameterList.cpp \
+BeckhoffADS/AdsLib/AdsDevice.cpp \
+BeckhoffADS/AdsLib/RouterAccess.cpp \
 
+# Do not include the main programs:
+#BeckhoffADS/AdsLibTest/main.cpp \
+#BeckhoffADS/AdsLibOOITest/main.cpp \
+#BeckhoffADS/AdsTool/main.cpp \
+#BeckhoffADS/AdsLibTestRef/main.cpp \
 
 
 # download ADS if needed
