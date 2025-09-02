@@ -22,11 +22,13 @@ adsApp/src/LicenseAccess.cpp
 adsApp/src/Log.cpp
 adsApp/src/NotificationDispatcher.cpp
 adsApp/src/O.*
+adsApp/src/ParameterList.cpp
 adsApp/src/RTimeAccess.cpp
 adsApp/src/RegistryAccess.cpp
 adsApp/src/RouterAccess.cpp
 adsApp/src/Sockets.cpp
 adsApp/src/SymbolAccess.cpp
+adsApp/src/example.cpp
 adsExApp/Db/O.*
 adsExApp/src/O.*
 bin/
