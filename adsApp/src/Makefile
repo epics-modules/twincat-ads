@@ -23,7 +23,7 @@ USR_LDFLAGS  += -lpthread
 #=============================
 # Build the IOC application
 
-#LIBRARY_IOC = ads
+LIBRARY_IOC = ads
 
 DBD += ads.dbd
 
