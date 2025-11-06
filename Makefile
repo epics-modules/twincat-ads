@@ -21,6 +21,9 @@ BeckhoffADS/AdsLib/LicenseAccess.cpp \
 BeckhoffADS/AdsLib/RTimeAccess.cpp \
 BeckhoffADS/AdsLib/RouterAccess.cpp \
 BeckhoffADS/AdsLib/Sockets.cpp \
+BeckhoffADS/AdsLib/bhf/ParameterList.cpp \
+BeckhoffADS/AdsLib/RegistryAccess.cpp \
+BeckhoffADS/AdsLib/SymbolAccess.cpp \
 BeckhoffADS/AdsLib/standalone/AmsNetId.cpp \
 BeckhoffADS/AdsLib/standalone/AdsLib.cpp \
 BeckhoffADS/AdsLib/standalone/AmsPort.cpp \
