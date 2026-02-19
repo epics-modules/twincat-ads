@@ -83,6 +83,8 @@ Where:
     polling period in seconds.
 
 - `<PLC_SYMBOL>`: PLC variable name;
+  - Note: An exception for this is `.AMSPORTSTATE.`, that can be used instead of
+    a PLC Symbol to read / write the current ADSPORT state.
 - `[? | =]:` End Symbol with `?` for read access (input or output with readback)
   or `=` for write access.
 
