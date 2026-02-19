@@ -1,13 +1,11 @@
-#RELEASE Location of external products
-# Run "gnumake clean uninstall install" in the application
-# top directory each time this file is changed.
+# RELEASE - Location of external support modules
 
-include $(TOP)/configure/RELEASE_PATHS.local
--include $(TOP)/configure/RELEASE_PATHS.local.$(EPICS_HOST_ARCH)
-include $(TOP)/configure/RELEASE_LIBS.local
+MODULES=/opt/epics/support
+EPICS_BASE=/opt/epics/base-7.0.8.1
+ASYN=$(MODULES)/asyn-R4-45
+
+# These lines allow developers to override these RELEASE settings
+# without having to modify this file directly.
+-include $(TOP)/../RELEASE.local
+-include $(TOP)/../RELEASE.$(EPICS_HOST_ARCH).local
 -include $(TOP)/configure/RELEASE.local
-
-#TEMPLATE_TOP=$(EPICS_BASE)/templates/makeBaseApp/top
-# If you don't want to install into $(TOP) then
-# define INSTALL_LOCATION_APP here
-#INSTALL_LOCATION_APP=<fullpathname>
