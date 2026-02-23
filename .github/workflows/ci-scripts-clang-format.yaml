@@ -1,0 +1,28 @@
+# This is YAML - indentation levels are crucial
+
+# Workflow name
+
+name: workflow-clang-format
+
+# Trigger on pushes and PRs to any branch
+on:
+  push:
+  pull_request:
+
+jobs:
+  run-clang-format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install and run clang format
+        run: |
+            sudo apt-get install git || :
+            sudo apt-get install pip3 || :
+            sudo apt-get install python3-pip || :
+            sudo pip install pre-commit
+            pre-commit run --all-files
+
+      - name: check whitespace damage
+        run: |
+          ./checkws.sh
