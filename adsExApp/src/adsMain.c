@@ -1,32 +1,36 @@
 /*
     This file is part of twincat-ads.
 
-    twincat-ads is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+    twincat-ads is free software: you can redistribute it and/or modify it under
+   the terms of the GNU Lesser General Public License as published by the Free
+   Software Foundation, either version 3 of the License, or (at your option) any
+   later version.
 
-    twincat-ads is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+    twincat-ads is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+   FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
+   details.
 
-    You should have received a copy of the GNU Lesser General Public License along with twincat-ads. If not, see <https://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Lesser General Public License
+   along with twincat-ads. If not, see <https://www.gnu.org/licenses/>.
 
 */
 
 #include <stddef.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "epicsExit.h"
 #include "epicsThread.h"
 #include "iocsh.h"
 
-int main(int argc,char *argv[])
-{
-    if (argc >= 2)
-    {
-        iocsh(argv[1]);
-        epicsThreadSleep(.2);
-    }
-    iocsh(NULL);
-    epicsExit(0);
-    return(0);
+int main(int argc, char *argv[]) {
+  if (argc >= 2) {
+    iocsh(argv[1]);
+    epicsThreadSleep(.2);
+  }
+  iocsh(NULL);
+  epicsExit(0);
+  return (0);
 }
