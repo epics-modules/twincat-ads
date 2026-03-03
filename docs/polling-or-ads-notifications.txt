@@ -1,0 +1,58 @@
+
+Some word about the notifications (versus a 1 second poll)
+For EPICS input records we can set up notifications.
+(That is the default, unless you use "/POLL_RATE=1.0/")
+
+Notifications work well for
+a) Values that change seldom
+b) Values that need a PLC timestamp (technically the TwinCAT time)
+
+Notifications may not well for
+c) Noisy temperature sensors
+d) Many, many, sensors
+e) Output records with readback
+
+The following shows the results of a quick test:
+Having a longin with
+ADSPORT=852/TIMEBASE=PLC/T_DLY_MS=500/TS_MS=200/GVL_PILS.stEL5101CounterValue.nvalue?
+
+... and running camonitor gives, when I move the motor 1 mm:
+
+LabS-MCAG:MC-MCU-1006:EncoderRaw 2026-02-23 17:37:26.395846 4724
+LabS-MCAG:MC-MCU-1006:EncoderRaw 2026-02-23 17:37:34.616832 4711
+LabS-MCAG:MC-MCU-1006:EncoderRaw 2026-02-23 17:37:34.816508 4690
+
+While pyadsmonitor uses something corresponding to
+T_DLY_MS=1/TS_MS=1/
+While it doesn't use EPICS. I am talking about the parameters for
+the notifications, which both epics/twincat-ads and
+python/adsmonitor use. See
+https://gitlab.esss.lu.se/mcag/sources/pyads-monitor
+
+
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.478 4723
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.518 4722
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.538 4721
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.538 4720
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.566 4719
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.567 4717
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.568 4716
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.579 4715
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.587 4713
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.617 4711
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.617 4710
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.618 4708
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.628 4706
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.638 4705
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.666 4703
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.667 4702
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.668 4700
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.677 4699
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.688 4698
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.717 4696
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.717 4695
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.718 4694
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.728 4693
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.738 4692
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.818 4691
+stEL5101CounterValue.nvalue         2026-02-23 17:37:34.818 4690

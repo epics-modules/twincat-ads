@@ -7,13 +7,65 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License along with twincat-ads. If not, see <https://www.gnu.org/licenses/>.
 #
+
+#
+# Some general words about this driver:
+# This driver allows to connect EPICS PVs to PLC variables.
+# When this change of a PLC variable is picked up from  the PLC code
+# is depending who the PLC code is written and the PLC cycle time.
+# When a value is changed inside the PLC, the value may be picked up
+# some milliseconds later, it may clip it to a maximal/minimal value,
+# round it an integer value.
+#
+# Somewhat simplified, it allows to peek and poke PLC variables.
+# To be more clear, there is no handshake, where the PLC acknowledges
+# or rejects a write.
+# If you need that, a more advanced handling is needed (PILS ?)
+#
+# One observation when working with PLCs needs to be mentioned here:
+# When we are unsure about the "manipulation" of values inside the PLC
+# it may be a good idea to have two variables:
+# One "setpoint variable" connected to an EPICS output record,
+# one "readback variable" connected to an EPICS input record.
+# So we end up with 2 records: SetFAmplitude_S (setpoint)
+# and SetFAmplitude_RB (readback).
+# As a theoretical example:
+# The user sets an amplitude of 99.99 (as a result of a calulation)
+# That goes into SetFAmplitude_S
+# The PLC rounds it into 100.0, because that is what the hardware can
+# achieve.
+# While ramping up, the amplitude changes between lets say 50.0 to 100.0
+# To have that value visible in an experiment log file a 3rd variable
+# may be needed: FAmplitude_Act
+#
+# Another challange is observed when the PLC e.g. has it's own
+# local user interface, a touch panel or so.
+# Or an enginerering tool is used.
+# Then the _S and _RB EPICS PVs will diverge. This is confusing and
+# may be potential dangerous.
+# To overcome this problem EPICS output records may be configured
+# to read back the setpoint from the PLC and changes the VAl field
+# of this output record.
+# Note that this feature must be enabled in the record and be supported
+# by the driver (which it is). Please see below for examples
+#
+
 ###############################################################################
 # fAmplitude: Three different types:
 #             1a. ao with readback  (I/O intr)
 #             1b. ao with readback  (polled with 1 Hz)
-#             2. ao without readback
-#             3  ai I/O intr
+#             2.  ao without readback
+#             3.  ai I/O intr
 
+# 1a. ao with readback  (I/O intr)
+# Note: For slow control this may be tricky:
+# E.g When we write an amplitude that is too high,
+# the PLC may silently ignore the write.
+# Example: The current amplitude is 50, the maximum 100, defined in the PLC
+# When the EPICS record writes 120, the PLC will ignore it.
+# And no callback is fired, so that the EPICS record stays at 120
+# while the PLC uses 50
+# Change to /POLL_RATE=1.0/ (see below) in this case
 record(ao,"$(P)SetFAmplitudeRB"){
     field(PINI, "1")
     field(TSE,  "-2")
@@ -25,6 +77,8 @@ record(ao,"$(P)SetFAmplitudeRB"){
     info(asyn:READBACK,"1")
 }
 
+# 1b. ao with readback  (polled with 1 Hz)
+# Recommended for slow control, see above
 record(ao,"$(P)SetFAmplitudeRB"){
     field(PINI, "1")
     field(TSE,  "-2")
@@ -36,6 +90,7 @@ record(ao,"$(P)SetFAmplitudeRB"){
     info(asyn:READBACK,"1")
 }
 
+# 2. Analog output
 record(ao,"$(P)SetFAmplitude"){
     field(PINI, "1")
     field(TSE,  "-2")
@@ -44,7 +99,7 @@ record(ao,"$(P)SetFAmplitude"){
     field(PREC, "3")
     field(SCAN, "Passive")
 }
-
+# 3. Analog input
 record(ai,"$(P)GetFAmplitude"){
     field(PINI, "1")
     field(TSE,  "-2")
@@ -57,8 +112,11 @@ record(ai,"$(P)GetFAmplitude"){
 ###############################################################################
 # fTest: Fast update rate:
 # TS_MS=10:      10ms sample rate in PLC)
-# T_DLY_MS=500:  500ms max delay for data to be sent from PLC (buffers in max 500ms). This could result in that 50 values (T_DLY_MS/TS_MS) are sent each 500ms (depending on if other communication is filling the PLC AMS buffers or not).
-# One with timestamp from PLC and one with EPICS timestamp
+# T_DLY_MS=500:  500ms max delay for data to be sent from PLC (buffers in max 500ms).
+# This could result in that 50 values (T_DLY_MS/TS_MS) are sent each 500ms
+# (depending on if other communication is filling the PLC AMS buffers or not).
+# For more information see docs/polling-or-ads-notifications.txt
+# One with timestamp from PLC and one with IOC (EPICS) timestamp
 
 record(ai,"$(P)GetFTestPLCTime"){
     field(PINI, "1")
