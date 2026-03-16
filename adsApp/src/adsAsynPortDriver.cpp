@@ -721,7 +721,7 @@ void adsAsynPortDriver::report(FILE *fp, int details) {
             functionName);
 
   if (!fp) {
-    fprintf(fp, "%s:%s: ERROR: File NULL.\n", driverName, functionName);
+    printf("%s:%s: ERROR: File NULL.\n", driverName, functionName);
     return;
   }
 
