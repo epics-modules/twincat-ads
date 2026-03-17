@@ -13,46 +13,33 @@ d) Many, many, sensors
 e) Output records with readback
 
 The following shows the results of a quick test:
-Having a longin with
+Having two longins with
 ADSPORT=852/TIMEBASE=PLC/T_DLY_MS=500/TS_MS=200/GVL_PILS.stEL5101CounterValue.nvalue?
+and
+ADSPORT=852/TIMEBASE=PLC/T_DLY_MS=500/TS_MS=1/GVL_PILS.stEL5101CounterValue.nvalue?
 
 ... and running camonitor gives, when I move the motor 1 mm:
 
-LabS-MCAG:MC-MCU-1006:EncoderRaw 2026-02-23 17:37:26.395846 4724
-LabS-MCAG:MC-MCU-1006:EncoderRaw 2026-02-23 17:37:34.616832 4711
-LabS-MCAG:MC-MCU-1006:EncoderRaw 2026-02-23 17:37:34.816508 4690
-
-While pyadsmonitor uses something corresponding to
-T_DLY_MS=1/TS_MS=1/
-While it doesn't use EPICS. I am talking about the parameters for
-the notifications, which both epics/twincat-ads and
-python/adsmonitor use. See
-https://gitlab.esss.lu.se/mcag/sources/pyads-monitor
-
-
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.478 4723
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.518 4722
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.538 4721
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.538 4720
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.566 4719
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.567 4717
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.568 4716
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.579 4715
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.587 4713
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.617 4711
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.617 4710
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.618 4708
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.628 4706
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.638 4705
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.666 4703
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.667 4702
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.668 4700
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.677 4699
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.688 4698
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.717 4696
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.717 4695
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.718 4694
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.728 4693
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.738 4692
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.818 4691
-stEL5101CounterValue.nvalue         2026-02-23 17:37:34.818 4690
+# First "callback" when the system starts
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:58:56.732280 4787
+LabS-MCAG:MC-MCU-1006:EncoderRawP200ms 2026-03-17 10:58:56.732286 4787
+# Move the motor
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.448157 4785
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.488586 4783
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.518551 4781
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.528207 4779
+LabS-MCAG:MC-MCU-1006:EncoderRawP200ms 2026-03-17 10:59:23.557945 4778
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.558489 4777
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.598498 4775
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.628552 4773
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.638531 4771
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.669819 4769
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.699587 4767
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.729942 4765
+LabS-MCAG:MC-MCU-1006:EncoderRawP200ms 2026-03-17 10:59:23.758619 4764
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.777669 4763
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.807956 4761
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.837835 4759
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.858510 4757
+LabS-MCAG:MC-MCU-1006:EncoderRawP1ms 2026-03-17 10:59:23.897407 4755
+LabS-MCAG:MC-MCU-1006:EncoderRawP200ms 2026-03-17 10:59:24.028100 4754
