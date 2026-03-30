@@ -9,6 +9,9 @@
 #
 # Makefile when running gnu make
 
+# install binaries by default (normal EPICS behaviour): avoid needing to run make && make install
+.DEFAULT_GOAL := install
+
 # Stolen from how the Beckhoff ninja builds the lib
 # With some tweaking afterwards (replace _ with /)
 ADS_FROM_BECKHOFF_SOURCES = \
@@ -33,13 +36,15 @@ BeckhoffADS/AdsLib/standalone/NotificationDispatcher.cpp \
 
 
 # download ADS if needed
-build: adsApp/src/ADS_FROM_BECKHOFF_SUPPORTSOURCES.mak checkws
+build: prepare
 
-install: adsApp/src/ADS_FROM_BECKHOFF_SUPPORTSOURCES.mak checkws
+install: prepare
 
 clean: cleanadssources
 
-checkws:
+prepare: adsApp/src/ADS_FROM_BECKHOFF_SUPPORTSOURCES.mak checkws
+
+checkws: 
 	./checkws.sh
 
 cleanadssources:
@@ -51,4 +56,4 @@ adsApp/src/ADS_FROM_BECKHOFF_SUPPORTSOURCES.mak: Makefile
 
 include Makefile.epics
 
-.PHONY: checkws
+.PHONY: checkws prepare clean cleanadssources
