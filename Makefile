@@ -45,7 +45,7 @@ clean: cleanadssources
 prepare: adsApp/src/ADS_FROM_BECKHOFF_SUPPORTSOURCES.mak checkws
 
 checkws: 
-	./checkws.sh
+	./tools/checkws.sh
 
 cleanadssources:
 	${PWD}/tools/downloadADS.sh clean ${ADS_FROM_BECKHOFF_SOURCES}

@@ -25,4 +25,4 @@ jobs:
 
       - name: check whitespace damage
         run: |
-          ./checkws.sh
+          ./tools/checkws.sh
