@@ -38,7 +38,8 @@ configure/RELEASE_LIBS.local
 configure/RELEASE_PATHS.local*
 db/
 dbd/
-iocBoot/
+envPaths
 lib/
 .vscode/
 *.local
+.iocsh_history
