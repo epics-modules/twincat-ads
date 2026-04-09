@@ -1,3 +1,5 @@
+#!../../bin/linux-x86_64/adsExApp
+
 #
 #    This file is part of twincat-ads.
 #
@@ -15,9 +17,15 @@
 #  2. The ams address of this linux client must be added to the TwinCAT ads router.
 #     In TwinCAT: Systems->routes->add route, use ip of linux machine plus ".1.1"=> "192.168.88.44.1.1"
 #  3. Download and start plc(s)
-#  4. start ioc on linux machine with: iocsh adsOnlyIO.cmd
+#  4. start ioc on linux machine with: ./st.cmd
 #
 ##############################################################################
+< envPaths
+cd "${TOP}"
+
+dbLoadDatabase "dbd/adsExApp.dbd"
+adsExApp_registerRecordDeviceDriver pdbbase
+
 ############# Configure ads device driver:
 # 1. Asyn port name                         :  "ADS_1"
 # 2. IP                                     :  "192.168.88.44"
@@ -30,20 +38,31 @@
 # 9. max delay time ms (buffer time in plc) :  100
 # 10. ADS command timeout in ms             :  5000
 # 11. default time source (PLC=0,EPICS=1)   :  0 (PLC) NOTE: record TSE field need to be set to -2 for timestamp in asyn ("field(TSE, -2)")
+epicsEnvSet("ASYN_PORT",             "ADS_1")
+epicsEnvSet("PLC_IP",                "192.168.88.63")
+epicsEnvSet("PLC_AMS_NET_ID",        "$(PLC_IP).1.1")
+epicsEnvSet("ADS_DEFAULT_PORT",      "851")
+epicsEnvSet("PARAM_TABLE_SIZE",      "1000")
+epicsEnvSet("PRIORITY",              "0")
+epicsEnvSet("DISABLE_AUTOCONNECT",   "0")
+epicsEnvSet("DEFAULT_SAMPLETIME_MS", "50")
+epicsEnvSet("MAX_DELAY_TIME_MS",     "100")
+epicsEnvSet("ADS_TIMEOUT_MS",        "5000")
+epicsEnvSet("DEFAULT_TIME_SRC",      "0")
 
-epicsEnvSet(ADS_DEFAULT_PORT, 851)
-adsAsynPortDriverConfigure("ADS_1","192.168.88.63","192.168.88.63.1.1",${ADS_DEFAULT_PORT},1000,0,0,50,100,1000,0)
+adsAsynPortDriverConfigure(${ASYN_PORT},${PLC_IP},${PLC_AMS_NET_ID},${ADS_DEFAULT_PORT},${PARAM_TABLE_SIZE},${PRIORITY},${DISABLE_AUTOCONNECT},${DEFAULT_SAMPLETIME_MS},${MAX_DELAY_TIME_MS},${ADS_TIMEOUT_MS},${DEFAULT_TIME_SRC})
 
-asynOctetSetOutputEos("ADS_1", -1, "\n")
-asynOctetSetInputEos("ADS_1", -1, "\n")
-asynSetTraceMask("ADS_1", -1, 0x41)
+asynOctetSetOutputEos(${ASYN_PORT}, -1, "\n")
+asynOctetSetInputEos(${ASYN_PORT}, -1, "\n")
+asynSetTraceMask(${ASYN_PORT}, -1, 0x41)
 
 ##############################################################################
 ############# Load records (asyn direct I/O intr):
-dbLoadRecords("../adsExApp/Db/adsTestAsyn.db","P=ADS_IOC:ASYN:,PORT=ADS_1,ADSPORT=${ADS_DEFAULT_PORT}")
+dbLoadRecords("db/adsTestAsyn.db","P=ADS_IOC:ASYN:,PORT=${ASYN_PORT},ADSPORT=${ADS_DEFAULT_PORT}")
 
 ##############################################################################
 ############# Useful commands
-#asynReport(2,"ADS_1")
-#asynSetTraceMask("ADS_1", -1, 0xFF)
+#asynReport(2,"${ASYN_PORT}")
+#asynSetTraceMask("${ASYN_PORT}", -1, 0xFF)
+cd "${TOP}/iocBoot/${IOC}"
 iocInit

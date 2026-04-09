@@ -30,6 +30,7 @@ DBD += ads.dbd
 # Add source files
 -include $(TOP)/adsApp/src/ADS_FROM_BECKHOFF_SUPPORTSOURCES.mak
 
+ads_SRCS += ads_registerRecordDeviceDriver.cpp
 ads_SRCS += adsAsynPortDriver.cpp
 ads_SRCS += adsAsynPortDriverUtils.cpp
 ads_SRCS += ${ADS_FROM_BECKHOFF_SUPPORTSOURCES}

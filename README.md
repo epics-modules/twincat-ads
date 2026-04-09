@@ -91,7 +91,7 @@ A database with several example records can be found in
 [adsExApp/Db/adsTestAsyn.db](adsExApp/Db/adsTestAsyn.db).
 
 The corresponding startup script with necessary configurations is available in
-[startup/adsOnlyIO.cmd](startup/adsOnlyIO.cmd).
+[iocBoot/iocexample/st.cmd](iocBoot/iocexample/st.cmd).
 
 ## License information
 

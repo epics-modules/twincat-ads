@@ -7,5 +7,10 @@
 #
 #    You should have received a copy of the GNU Lesser General Public License along with twincat-ads. If not, see <https://www.gnu.org/licenses/>.
 #
+TOP=../..
+
+include $(TOP)/configure/CONFIG
 
 DB += adsTestAsyn.db
+
+include $(TOP)/configure/RULES
