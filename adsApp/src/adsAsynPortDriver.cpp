@@ -414,13 +414,11 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
     bulk[i].cnt = 0; // Entry is currently unused!!
   bulkTScnt = 0;
   if (defaultSampleTimeMS_ < 1000) {
-    printf("Default Sample Time of %d ms is too small, defaulting to 1Hz.\n",
-           defaultSampleTimeMS_);
     bulk_delay_us = 1000000; // 1 Hz
   } else {
-    printf("Default bulk read time: %d ms\n", defaultSampleTimeMS_);
     bulk_delay_us = defaultSampleTimeMS_ * 1000;
   }
+  printf("bulk read time: %d ms\n", defaultSampleTimeMS_);
   bulkdatasize = 4 * 1024 * 1024; // This is excessive!
   bulkdata = (uint8_t *)malloc(bulkdatasize);
   bulkOK = 0;
