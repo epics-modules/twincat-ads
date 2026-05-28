@@ -418,7 +418,7 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
   } else {
     bulk_delay_us = defaultSampleTimeMS_ * 1000;
   }
-  printf("bulk read time: %d ms\n", defaultSampleTimeMS_);
+  printf("bulk read time: %d ms\n", bulk_delay_us / 1000);
   bulkdatasize = 4 * 1024 * 1024; // This is excessive!
   bulkdata = (uint8_t *)malloc(bulkdatasize);
   bulkOK = 0;
