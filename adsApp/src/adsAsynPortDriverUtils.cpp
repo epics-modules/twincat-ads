@@ -458,8 +458,11 @@ asynParamType dtypStringToAsynType(char *dtype) {
       strcmp("asynFloat64ArrayOut", dtype) == 0) {
     return asynParamFloat64Array;
   }
+  if (strcmp("asynOctetRead", dtype) == 0 ||
+      strcmp("asynOctetWrite", dtype) == 0) {
+    return asynParamOctet;
+  }
   //  asynParamUInt32Digital,
-  //  asynParamOctet,
   //  asynParamGenericPointer
 
   return asynParamNotDefined;
