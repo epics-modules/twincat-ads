@@ -371,6 +371,77 @@ record(waveform,"$(P)GetSTest"){
 }
 
 ###############################################################################
+# sTest (native string): stringout/stringin and lso/lsi
+#        The same PLC variable is also accessible via asynInt8ArrayOut/In
+#        (see SetSTestRB/GetSTest above).
+#        Uses DTYP asynOctetWrite/asynOctetRead for direct string access without
+#        client-side formatting.
+#
+#        stringout/stringin: up to 40 characters
+#        lso/lsi:            longer strings; SIZV must be >= plcSize + 1
+#
+#        Three patterns for each:
+#             1. output with readback  (I/O intr)
+#             2. output without readback
+#             3. input  I/O intr
+
+record(stringout,"$(P)SetSTestStringRB"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/Main.sTest?")
+    field(SCAN, "Passive")
+
+    info(asyn:READBACK,"1")
+}
+
+record(stringout,"$(P)SetSTestString"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/Main.sTest=")
+    field(SCAN, "Passive")
+}
+
+record(stringin,"$(P)GetSTestString"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/Main.sTest?")
+    field(SCAN, "I/O Intr")
+}
+
+# longer strings
+record(lso,"$(P)SetSTestLsoRB"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/Main.sTest?")
+    field(SIZV, "100")
+    field(SCAN, "Passive")
+
+    info(asyn:READBACK,"1")
+}
+
+record(lso,"$(P)SetSTestLso"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/Main.sTest=")
+    field(SIZV, "100")
+    field(SCAN, "Passive")
+}
+
+record(lsi,"$(P)GetSTestLsi"){
+    field(PINI, "1")
+    field(TSE,  "-2")
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/Main.sTest?")
+    field(SIZV, "100")
+    field(SCAN, "I/O Intr")
+}
+
+###############################################################################
 # Int8Array: waveform Output and Input
 #        Three different types:
 #             1. waveform with readback  (I/O intr)
