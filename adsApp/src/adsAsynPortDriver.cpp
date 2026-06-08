@@ -1922,6 +1922,15 @@ asynStatus adsAsynPortDriver::readOctet(asynUser *pasynUser, char *value,
   const char *functionName = "readOctet";
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
+  /* Dispatch to base class for PLC STRING parameters (asynParamOctet). The
+   * base class reads the value from the parameter library, which was populated
+   * by setStringParam() inside fireCallbacks(). */
+  if (pAdsParamArray_[pasynUser->reason] != nullptr &&
+      pAdsParamArray_[pasynUser->reason]->plcDataType == ADST_STRING) {
+    return asynPortDriver::readOctet(pasynUser, value, maxChars, nActual,
+                                     eomReason);
+  }
+
   size_t thisRead = 0;
   int reason = 0;
   asynStatus status = asynSuccess;
@@ -2026,6 +2035,27 @@ asynStatus adsAsynPortDriver::writeOctet(asynUser *pasynUser, const char *value,
   const char *functionName = "writeOctet";
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s: %s\n", driverName, functionName,
             value);
+
+  /* Write to PLC for STRING parameters (asynParamOctet). The value is
+   * zero-padded to plcSize to satisfy TwinCAT fixed-length string convention.
+   */
+  if (pAdsParamArray_[pasynUser->reason] != nullptr &&
+      pAdsParamArray_[pasynUser->reason]->plcDataType == ADST_STRING) {
+    adsParamInfo *paramInfo = pAdsParamArray_[pasynUser->reason];
+    size_t inputSize = (size_t)(paramInfo->plcSize - 1);
+    size_t copyLen = inputSize > maxChars ? maxChars : inputSize;
+    char *writeBuf = (char *)calloc(paramInfo->plcSize, 1);
+    if (!writeBuf) {
+      return asynError;
+    }
+    memcpy(writeBuf, value, copyLen);
+    asynStatus stat = adsWriteParam(paramInfo, writeBuf, paramInfo->plcSize);
+    free(writeBuf);
+    if (stat == asynSuccess) {
+      *nActual = copyLen;
+    }
+    return stat;
+  }
 
   size_t thisWrite = 0;
   asynStatus status = asynError;
@@ -4599,6 +4629,10 @@ asynStatus adsAsynPortDriver::adsUpdateParameter(adsParamInfo *paramInfo,
       // handled in fireCallbacks()
       ret = asynSuccess;
       break;
+    case asynParamOctet:
+      // handled in fireCallbacks()
+      ret = asynSuccess;
+      break;
     default:
       asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
                 "%s:%s: Type combination not supported. PLC type = %s, ASYN "
@@ -4797,6 +4831,18 @@ asynStatus adsAsynPortDriver::fireCallbacks(adsParamInfo *paramInfo) {
                                  paramInfo->lastCallbackSize,
                                  paramInfo->paramIndex, paramInfo->asynAddr);
       break;
+    case asynParamOctet: {
+      char *buf = (char *)paramInfo->arrayDataBuffer;
+      size_t safeSz = paramInfo->lastCallbackSize;
+      if (safeSz > paramInfo->plcSize)
+        safeSz = paramInfo->plcSize;
+      if (safeSz > 0)
+        buf[safeSz - 1] = '\0'; // ensure null termination
+      ret = setStringParam(paramInfo->paramIndex, buf);
+      if (ret == asynSuccess)
+        ret = callParamCallbacks(paramInfo->asynAddr, 0);
+      break;
+    }
     default:
       asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
                 "%s:%s: Type combination not supported. PLC type = %s, ASYN "
