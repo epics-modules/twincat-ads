@@ -1,5 +1,19 @@
 # RELEASE NOTES
 
+## Release v2.2.0 (2026-06-09)
+
+- New feature:
+  support for EPICS (long) strings via asynOctetRead/Write
+
+- Bug fix:
+  Fix confusing/wrong value of reported bulk read time
+
+- Improvements:
+  Update Beckhoff-ADS 113.0.32-1 (the latest released version)
+  Reformat the code
+  Proper ci scripts
+  Various improvements in directory structiure, Makefiles...
+
 ## Release v2.1.3 (2025-11-06)
 
 - Update the underlying BeckhoffADS to V22. This should fix issues with "newer"
