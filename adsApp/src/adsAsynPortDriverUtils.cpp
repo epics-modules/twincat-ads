@@ -20,9 +20,6 @@
  *
  * Utilities and definitions used by adsAsynPortDriver-class.
  *
- * Author: Anders Sandström
- *
- * Created January 30, 2018
  */
 
 #include "adsAsynPortDriverUtils.h"

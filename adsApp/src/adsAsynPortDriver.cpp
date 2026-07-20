@@ -23,11 +23,6 @@
  * AdsLib written by Beckhoff is used for communication:
  * https://github.com/Beckhoff/ADS
  *
- * Author: Anders Sandström
- * Edited to add bulk reads: Michael Browne
- *
- * Created January 25, 2018
- * Edited  December 6, 2019
  */
 
 #define USE_TYPED_RSET // Shut up about rset already!
