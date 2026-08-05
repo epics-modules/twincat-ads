@@ -64,7 +64,7 @@ static initHookState currentEpicsState = initHookAtIocBuild;
  * changes.
  */
 static void getEpicsState(initHookState state) {
-  const char *functionName = "getEpicsState";
+  const char *functionName = __FUNCTION__;
   static struct timeval start;
   struct timeval now, diff;
 
@@ -126,7 +126,7 @@ static void
 adsSymbolsChangedCallback(const AmsAddr *pAddr,
                           const AdsNotificationHeader *pNotification,
                           uint32_t hUser) {
-  const char *functionName = "adsSymbolsChangedCallback";
+  const char *functionName = __FUNCTION__;
 
   if (!adsAsynPortObj) {
     printf("%s:%s: ERROR: adsAsynPortObj==NULL\n", driverName, functionName);
@@ -152,7 +152,7 @@ adsSymbolsChangedCallback(const AmsAddr *pAddr,
 static void adsDataCallback(const AmsAddr *pAddr,
                             const AdsNotificationHeader *pNotification,
                             uint32_t hUser) {
-  const char *functionName = "adsDataCallback";
+  const char *functionName = __FUNCTION__;
 
   if (!adsAsynPortObj) {
     printf("%s:%s: ERROR: adsAsynPortObj==NULL\n", driverName, functionName);
@@ -291,7 +291,7 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
           priority,      /* Default priority */
           0)             /* Default stack size*/
 {
-  const char *functionName = "adsAsynPortDriver";
+  const char *functionName = __FUNCTION__;
   // Extra Debugging from the beginning: pasynTrace->setTraceMask(pasynUserSelf,
   // 0x11);
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
@@ -462,7 +462,7 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
  * Cleanup and deallocation of variables.
  */
 adsAsynPortDriver::~adsAsynPortDriver() {
-  const char *functionName = "~adsAsynPortDriver";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -501,7 +501,7 @@ adsAsynPortDriver::~adsAsynPortDriver() {
  * At reconnect all symbolic handles and callbacks will be reregistered.
  */
 void adsAsynPortDriver::cyclicThread() {
-  const char *functionName = "cyclicThread";
+  const char *functionName = __FUNCTION__;
   double sampleTime = 0.5;
   while (1) {
     asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Sample time [s]= %lf.\n",
@@ -610,7 +610,7 @@ void adsAsynPortDriver::cyclicThread() {
 
 /* TBD - Poll at different rates depending on pollClass! */
 void adsAsynPortDriver::bulkReadThread() {
-  const char *functionName = "bulkReadThread";
+  const char *functionName = __FUNCTION__;
   struct timeval start, now;
   uint32_t bytesRead;
   long status;
@@ -709,7 +709,7 @@ void adsAsynPortDriver::bulkReadThread() {
  * Check ads state of all connected ams ports and reconnects if needed.
  */
 void adsAsynPortDriver::report(FILE *fp, int details) {
-  const char *functionName = "report";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -841,7 +841,7 @@ asynStatus adsAsynPortDriver::disconnectLock(asynUser *pasynUser) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::disconnect(asynUser *pasynUser) {
-  const char *functionName = "disconnect";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   asynStatus disconnectStatus = adsDisconnect();
@@ -876,7 +876,7 @@ asynStatus adsAsynPortDriver::refreshParamsLock(uint16_t amsPort) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::refreshParams(uint16_t amsPort) {
-  const char *functionName = "refreshParams";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -928,7 +928,7 @@ asynStatus adsAsynPortDriver::invalidateParamsLock(uint16_t amsPort) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::invalidateParams(uint16_t amsPort) {
-  const char *functionName = "invalidateParams";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -976,7 +976,7 @@ asynStatus adsAsynPortDriver::connectLock(asynUser *pasynUser) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::connect(asynUser *pasynUser) {
-  const char *functionName = "connect";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s: %s\n", driverName, functionName,
             epicsThreadGetNameSelf());
 
@@ -1002,7 +1002,7 @@ asynStatus adsAsynPortDriver::connect(asynUser *pasynUser) {
  * field of an record.
  */
 asynStatus adsAsynPortDriver::validateDrvInfo(const char *drvInfo) {
-  const char *functionName = "validateDrvInfo";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: drvInfo: %s\n", driverName,
             functionName, drvInfo);
 
@@ -1046,7 +1046,7 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
                                             const char *drvInfo,
                                             const char **pptypeName,
                                             size_t *psize) {
-  const char *functionName = "drvUserCreate";
+  const char *functionName = __FUNCTION__;
   static int vcnt = 0;
 
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s: drvInfo: %s\n", driverName,
@@ -1193,7 +1193,7 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
  */
 asynStatus
 adsAsynPortDriver::updateParamInfoWithPLCInfo(adsParamInfo *paramInfo) {
-  const char *functionName = "updateParamInfoWithPLCInfo";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: : %s\n", driverName,
             functionName, paramInfo->drvInfo);
 
@@ -1428,7 +1428,7 @@ int adsAsynPortDriver::adsFindBulkTimeStamp(uint16_t amsPort) {
 asynStatus
 adsAsynPortDriver::getRecordInfoFromDrvInfo(const char *drvInfo,
                                             adsParamInfo *paramInfo) {
-  const char *functionName = "getRecordInfoFromDrvInfo";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: drvInfo: %s\n", driverName,
             functionName, drvInfo);
 
@@ -1551,7 +1551,7 @@ adsAsynPortDriver::getRecordInfoFromDrvInfo(const char *drvInfo,
  */
 asynStatus adsAsynPortDriver::parsePlcInfofromDrvInfo(const char *drvInfo,
                                                       adsParamInfo *paramInfo) {
-  const char *functionName = "parsePlcInfofromDrvInfo";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: drvInfo: %s\n", driverName,
             functionName, drvInfo);
 
@@ -1803,7 +1803,7 @@ asynStatus adsAsynPortDriver::parsePlcInfofromDrvInfo(const char *drvInfo,
  * \return amsPortInfo object.
  */
 amsPortInfo *adsAsynPortDriver::getAmsPortObject(uint16_t amsPort) {
-  const char *functionName = "getAmsPortObject";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: amsPort:%u\n", driverName,
             functionName, amsPort);
 
@@ -1820,7 +1820,7 @@ amsPortInfo *adsAsynPortDriver::getAmsPortObject(uint16_t amsPort) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::addNewAmsPortToList(uint16_t amsPort) {
-  const char *functionName = "addNewAmsPortToList";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: amsPort:%u\n", driverName,
             functionName, amsPort);
 
@@ -1874,7 +1874,7 @@ bool adsAsynPortDriver::isCallbackAllowed(adsParamInfo *paramInfo) {
  * \return true if connection ti ams-port is ok otherwise false.
  */
 bool adsAsynPortDriver::isCallbackAllowed(uint16_t amsPort) {
-  const char *functionName = "isCallbackAllowed";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: amsPort:%u\n", driverName,
             functionName, amsPort);
 
@@ -1914,7 +1914,7 @@ bool adsAsynPortDriver::isCallbackAllowed(uint16_t amsPort) {
 asynStatus adsAsynPortDriver::readOctet(asynUser *pasynUser, char *value,
                                         size_t maxChars, size_t *nActual,
                                         int *eomReason) {
-  const char *functionName = "readOctet";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   /* Dispatch to base class for PLC STRING parameters (asynParamOctet). The
@@ -1978,7 +1978,7 @@ asynStatus adsAsynPortDriver::readOctet(asynUser *pasynUser, char *value,
  * \return 0 for success or error code.
  */
 int adsAsynPortDriver::octetCMDreadIt(char *outbuf, size_t outlen) {
-  const char *functionName = "octetCMDreadIt";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Buffer: %s, size: %d\n",
             driverName, functionName, outbuf, (int)outlen);
 
@@ -2027,7 +2027,7 @@ int adsAsynPortDriver::octetCMDreadIt(char *outbuf, size_t outlen) {
  */
 asynStatus adsAsynPortDriver::writeOctet(asynUser *pasynUser, const char *value,
                                          size_t maxChars, size_t *nActual) {
-  const char *functionName = "writeOctet";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s: %s\n", driverName, functionName,
             value);
 
@@ -2090,7 +2090,7 @@ asynStatus adsAsynPortDriver::writeOctet(asynUser *pasynUser, const char *value,
  * \return 0 for success or error code.
  */
 int adsAsynPortDriver::octetCMDwriteIt(const char *inbuf, size_t inlen) {
-  const char *functionName = "octetCMDwriteIt";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: Write command: %s, length: %d\n", driverName, functionName,
             inbuf, (int)inlen);
@@ -2128,7 +2128,7 @@ int adsAsynPortDriver::octetCMDwriteIt(const char *inbuf, size_t inlen) {
 
 int adsAsynPortDriver::octetCmdHandleInputLine(
     const char *input_line, adsOctetOutputBufferType *buffer) {
-  const char *functionName = "octetCmdHandleInputLine";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Input line: %s\n",
             driverName, functionName, input_line);
 
@@ -2168,7 +2168,7 @@ int adsAsynPortDriver::octetCmdHandleInputLine(
  */
 int adsAsynPortDriver::octetMotorHandleOneArg(
     const char *myarg_1, adsOctetOutputBufferType *buffer) {
-  const char *functionName = "octetMotorHandleOneArg";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Command: %s\n", driverName,
             functionName, myarg_1);
 
@@ -2261,7 +2261,7 @@ int adsAsynPortDriver::octetMotorHandleOneArg(
  */
 int adsAsynPortDriver::octetMotorHandleADRCmd(
     const char *arg, uint16_t amsport, adsOctetOutputBufferType *buffer) {
-  const char *functionName = "octetMotorHandleADRCmd";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Command: %s, amsPort: %d\n",
             driverName, functionName, arg, (int)amsport);
 
@@ -2334,7 +2334,7 @@ int adsAsynPortDriver::octetMotorHandleADRCmd(
 int adsAsynPortDriver::octetAdsReadByName(uint16_t amsPort,
                                           const char *variableAddr,
                                           adsOctetOutputBufferType *outBuffer) {
-  const char *functionName = "octetAdsReadByName";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Variable:%s, amsPort %u\n",
             driverName, functionName, variableAddr, amsPort);
 
@@ -2364,7 +2364,7 @@ int adsAsynPortDriver::octetAdsReadByName(uint16_t amsPort,
 int adsAsynPortDriver::octetAdsWriteByName(
     uint16_t amsPort, const char *variableAddr, const char *asciiValueToWrite,
     adsOctetOutputBufferType *outBuffer) {
-  const char *functionName = "octetAdsWriteByName";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Variable: %s, value: %s.\n",
             driverName, functionName, variableAddr, asciiValueToWrite);
 
@@ -2395,7 +2395,7 @@ int adsAsynPortDriver::octetAdsWriteByName(
 int adsAsynPortDriver::octetAdsReadByGroupOffset(
     uint16_t amsPort, adsSymbolEntry *info,
     adsOctetOutputBufferType *outBuffer) {
-  const char *functionName = "octetAdsReadByGroupOffset";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: amsPort: %d, group: %d, offset: %d, dataType: %s (%d), "
             "dataSize: %d.\n",
@@ -2480,7 +2480,7 @@ int adsAsynPortDriver::octetAdsWriteByGroupOffset(
     uint16_t amsPort, uint32_t group, uint32_t offset, uint16_t dataType,
     uint32_t dataSize, const char *asciiValueToWrite,
     adsOctetOutputBufferType *asciiResponseBuffer) {
-  const char *functionName = "octetAdsWriteByGroupOffset";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: amsPort: %d, group: %d, offset: %d, dataType: %s (%d), "
             "dataSize: %d.\n",
@@ -2533,7 +2533,7 @@ int adsAsynPortDriver::octetAdsWriteByGroupOffset(
  */
 asynStatus adsAsynPortDriver::writeInt32(asynUser *pasynUser,
                                          epicsInt32 value) {
-  const char *functionName = "writeInt32";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
   adsParamInfo *paramInfo;
   int paramIndex = pasynUser->reason;
@@ -2683,7 +2683,7 @@ asynStatus adsAsynPortDriver::writeInt32(asynUser *pasynUser,
  */
 asynStatus adsAsynPortDriver::writeFloat64(asynUser *pasynUser,
                                            epicsFloat64 value) {
-  const char *functionName = "writeFloat64";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   adsParamInfo *paramInfo;
@@ -2842,7 +2842,7 @@ asynStatus adsAsynPortDriver::adsGenericArrayRead(asynUser *pasynUser,
                                                   void *epicsDataBuffer,
                                                   size_t nEpicsBufferBytes,
                                                   size_t *nBytesRead) {
-  const char *functionName = "adsGenericArrayRead";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   int paramIndex = pasynUser->reason;
@@ -2908,7 +2908,7 @@ asynStatus adsAsynPortDriver::adsGenericArrayWrite(asynUser *pasynUser,
                                                    long allowedType,
                                                    const void *data,
                                                    size_t nEpicsBufferBytes) {
-  const char *functionName = "adsGenericArrayWrite";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   int paramIndex = pasynUser->reason;
@@ -2972,7 +2972,7 @@ asynStatus adsAsynPortDriver::adsGenericArrayWrite(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::readInt8Array(asynUser *pasynUser,
                                             epicsInt8 *value, size_t nElements,
                                             size_t *nIn) {
-  const char *functionName = "readInt8Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   if (!pAdsParamArray_[pasynUser->reason]) {
@@ -3012,7 +3012,7 @@ asynStatus adsAsynPortDriver::readInt8Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::writeInt8Array(asynUser *pasynUser,
                                              epicsInt8 *value,
                                              size_t nElements) {
-  const char *functionName = "writeInt8Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_INT8;
@@ -3040,7 +3040,7 @@ asynStatus adsAsynPortDriver::writeInt8Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::readInt16Array(asynUser *pasynUser,
                                              epicsInt16 *value,
                                              size_t nElements, size_t *nIn) {
-  const char *functionName = "readInt16Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_INT16;
@@ -3067,7 +3067,7 @@ asynStatus adsAsynPortDriver::readInt16Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::writeInt16Array(asynUser *pasynUser,
                                               epicsInt16 *value,
                                               size_t nElements) {
-  const char *functionName = "writeInt16Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_INT16;
@@ -3088,7 +3088,7 @@ asynStatus adsAsynPortDriver::writeInt16Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::readInt32Array(asynUser *pasynUser,
                                              epicsInt32 *value,
                                              size_t nElements, size_t *nIn) {
-  const char *functionName = "readInt32Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_INT32;
@@ -3115,7 +3115,7 @@ asynStatus adsAsynPortDriver::readInt32Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::writeInt32Array(asynUser *pasynUser,
                                               epicsInt32 *value,
                                               size_t nElements) {
-  const char *functionName = "writeInt32Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_INT32;
@@ -3136,7 +3136,7 @@ asynStatus adsAsynPortDriver::writeInt32Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::readFloat32Array(asynUser *pasynUser,
                                                epicsFloat32 *value,
                                                size_t nElements, size_t *nIn) {
-  const char *functionName = "readFloat32Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_REAL32;
@@ -3163,7 +3163,7 @@ asynStatus adsAsynPortDriver::readFloat32Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::writeFloat32Array(asynUser *pasynUser,
                                                 epicsFloat32 *value,
                                                 size_t nElements) {
-  const char *functionName = "writeFloat32Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_REAL32;
@@ -3183,7 +3183,7 @@ asynStatus adsAsynPortDriver::writeFloat32Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::readFloat64Array(asynUser *pasynUser,
                                                epicsFloat64 *value,
                                                size_t nElements, size_t *nIn) {
-  const char *functionName = "readFloat64Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_REAL64;
@@ -3210,7 +3210,7 @@ asynStatus adsAsynPortDriver::readFloat64Array(asynUser *pasynUser,
 asynStatus adsAsynPortDriver::writeFloat64Array(asynUser *pasynUser,
                                                 epicsFloat64 *value,
                                                 size_t nElements) {
-  const char *functionName = "writeFloat64Array";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
 
   long allowedType = ADST_REAL64;
@@ -3223,7 +3223,7 @@ asynStatus adsAsynPortDriver::writeFloat64Array(asynUser *pasynUser,
  * \return pasynUserSelf
  */
 asynUser *adsAsynPortDriver::getTraceAsynUser() {
-  const char *functionName = "getTraceAsynUser";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3250,7 +3250,7 @@ asynStatus adsAsynPortDriver::adsGetSymHandleByName(adsParamInfo *paramInfo) {
  */
 asynStatus adsAsynPortDriver::adsGetSymHandleByName(adsParamInfo *paramInfo,
                                                     bool blockErrorMsg) {
-  const char *functionName = "adsGetSymHandleByName";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3288,7 +3288,7 @@ asynStatus adsAsynPortDriver::adsGetSymHandleByName(adsParamInfo *paramInfo,
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::adsAddSymbolsChangedCallback(amsPortInfo *port) {
-  const char *functionName = "adsAddSymbolsChangedCallback";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Ams-port %u.\n", driverName,
             functionName, port->amsPort);
 
@@ -3331,7 +3331,7 @@ asynStatus adsAsynPortDriver::adsAddSymbolsChangedCallback(amsPortInfo *port) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::adsDelSymbolsChangedCallback(amsPortInfo *port) {
-  const char *functionName = "adsDelSymbolsChangedCallback";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3362,7 +3362,7 @@ asynStatus adsAsynPortDriver::adsDelSymbolsChangedCallback(amsPortInfo *port) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::adsAddDataCallback(adsParamInfo *paramInfo) {
-  const char *functionName = "adsAddDataCallback";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3469,7 +3469,7 @@ asynStatus adsAsynPortDriver::adsDelDataCallback(adsParamInfo *paramInfo) {
  */
 asynStatus adsAsynPortDriver::adsDelDataCallback(adsParamInfo *paramInfo,
                                                  bool blockErrorMsg) {
-  const char *functionName = "adsDelDataCallback";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3524,7 +3524,7 @@ asynStatus adsAsynPortDriver::adsGetSymInfoByName(uint16_t amsPort,
                                                   const char *varName,
                                                   adsSymbolEntry *info,
                                                   long *errorCode) {
-  const char *functionName = "adsGetSymInfoByName";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: Variable name: %s, amsPort: %d.\n", driverName,
             functionName, varName, (int)amsPort);
@@ -3616,7 +3616,7 @@ asynStatus adsAsynPortDriver::adsGetSymInfoByName(uint16_t amsPort,
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::adsGetSymInfoByName(adsParamInfo *paramInfo) {
-  const char *functionName = "adsGetSymInfoByName";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3644,7 +3644,7 @@ asynStatus adsAsynPortDriver::adsGetSymInfoByName(adsParamInfo *paramInfo) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::adsConnect() {
-  const char *functionName = "adsConnect";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3710,7 +3710,7 @@ asynStatus adsAsynPortDriver::adsConnect() {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::adsReadVersion(amsPortInfo *port) {
-  const char *functionName = "adsReadVersion";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Ams-port %u\n", driverName,
             functionName, port->amsPort);
 
@@ -3740,7 +3740,7 @@ asynStatus adsAsynPortDriver::adsReadVersion(amsPortInfo *port) {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::adsDisconnect() {
-  const char *functionName = "adsDisconnect";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: adsPort_=%ld\n", driverName,
             functionName, adsPort_);
 
@@ -3779,7 +3779,7 @@ adsAsynPortDriver::adsReleaseSymbolicHandle(adsParamInfo *paramInfo) {
  */
 asynStatus adsAsynPortDriver::adsReleaseSymbolicHandle(adsParamInfo *paramInfo,
                                                        bool blockErrorMsg) {
-  const char *functionName = "adsReleaseHandle";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3817,7 +3817,7 @@ asynStatus adsAsynPortDriver::adsReleaseSymbolicHandle(adsParamInfo *paramInfo,
 asynStatus adsAsynPortDriver::adsWriteParam(adsParamInfo *paramInfo,
                                             const void *binaryBuffer,
                                             uint32_t bytesToWrite) {
-  const char *functionName = "adsWriteParam";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -3912,7 +3912,7 @@ asynStatus adsAsynPortDriver::adsReadParam(adsParamInfo *paramInfo) {
  */
 asynStatus adsAsynPortDriver::adsReadParam(adsParamInfo *paramInfo, long *error,
                                            int updateAsynPar) {
-  const char *functionName = "adsReadParam";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -4063,7 +4063,7 @@ asynStatus adsAsynPortDriver::adsReadState(uint16_t *adsState) {
 asynStatus adsAsynPortDriver::adsReadState(uint16_t amsport, uint16_t *adsState,
                                            bool blockErrorMsg, long *error) {
 
-  const char *functionName = "adsReadState";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -4095,7 +4095,7 @@ asynStatus adsAsynPortDriver::adsReadState(uint16_t amsport, uint16_t *adsState,
  */
 asynStatus adsAsynPortDriver::adsWriteState(uint16_t amsport,
                                             uint16_t adsState) {
-  const char *functionName = "adsWriteState";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: adsState = %s (%u)\n",
             driverName, functionName, adsStateToString(adsState), adsState);
 
@@ -4126,7 +4126,7 @@ int adsAsynPortDriver::getParamTableSize() { return paramTableSize_; }
  * \return Parameter info structure.
  */
 adsParamInfo *adsAsynPortDriver::getAdsParamInfo(int index) {
-  const char *functionName = "getAdsParamInfo";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
             "%s:%s: Get paramInfo for index: %d\n", driverName, functionName,
             index);
@@ -4153,7 +4153,7 @@ int adsAsynPortDriver::getAdsParamCount() { return adsParamArrayCount_; }
  * Refreshes and sets timestamp depending on time source (PLC or EPICS).
  */
 asynStatus adsAsynPortDriver::refreshParamTime(adsParamInfo *paramInfo) {
-  const char *functionName = "refreshParamTime";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: plcTime %" PRIuMAX ".\n",
             driverName, functionName, (uintmax_t)paramInfo->plcTimeStampRaw);
 
@@ -4256,7 +4256,7 @@ asynStatus adsAsynPortDriver::adsUpdateParameter(adsParamInfo *paramInfo,
 asynStatus adsAsynPortDriver::adsUpdateParameter(adsParamInfo *paramInfo,
                                                  const void *data,
                                                  size_t dataSize) {
-  const char *functionName = "adsUpdateParameter";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -4670,7 +4670,7 @@ asynStatus adsAsynPortDriver::adsUpdateParameter(adsParamInfo *paramInfo,
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::fireAllCallbacksLock() {
-  const char *functionName = "fireAllCallbacksLock";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -4691,7 +4691,7 @@ asynStatus adsAsynPortDriver::fireAllCallbacksLock() {
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::fireCallbacks(adsParamInfo *paramInfo) {
-  const char *functionName = "fireCallbacks";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -4872,7 +4872,7 @@ asynStatus adsAsynPortDriver::fireCallbacks(adsParamInfo *paramInfo) {
  */
 asynStatus adsAsynPortDriver::setAlarmParam(adsParamInfo *paramInfo, int alarm,
                                             int severity) {
-  const char *functionName = "setAlarmParam";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -5012,7 +5012,7 @@ asynStatus adsAsynPortDriver::setAlarmPortLock(uint16_t amsPort, int alarm,
  */
 asynStatus adsAsynPortDriver::setAlarmPort(uint16_t amsPort, int alarm,
                                            int severity) {
-  const char *functionName = "setAlarmPort";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -5044,7 +5044,7 @@ void adsAsynPortDriver::adsUnlock() { adsMutex.unlock(); }
  * \return asynSuccess or asynError.
  */
 asynStatus adsAsynPortDriver::adsDelRoute(int force) {
-  const char *functionName = "adsDelRoute";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: force = %s\n", driverName,
             functionName, force ? "true" : "false");
   if (routeAdded_ || force) {
@@ -5076,7 +5076,7 @@ asynStatus adsAsynPortDriver::adsDelRouteLock(int force) {
  * Thread safe.
  */
 asynStatus adsAsynPortDriver::adsAddRouteLock() {
-  const char *functionName = "adsAddRouteLock";
+  const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
@@ -5289,7 +5289,7 @@ static const iocshFuncDef adsSetLocalAddressFuncDef = {"adsSetLocalAddress", 1,
                                                        adsSetLocalAddressArgs};
 
 static void adsSetLocalAddressCallFunc(const iocshArgBuf *args) {
-  const char *functionName = "adsSetLocalAddress";
+  const char *functionName = __FUNCTION__;
   if (!args[0].sval || strlen(args[0].sval) < 11) {
     printf("%s:%s: local_ams_id parameter required (of the form A.B.C.D.E.F)\n",
            driverName, functionName);
