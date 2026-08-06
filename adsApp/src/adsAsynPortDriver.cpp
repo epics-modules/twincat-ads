@@ -15,7 +15,7 @@
    along with twincat-ads. If not, see <https://www.gnu.org/licenses/>.
 
 */
-//#define MCB_DEBUG
+// #define MCB_DEBUG
 /*
  * adsAsynPortDriver.cpp
  *
@@ -503,6 +503,8 @@ adsAsynPortDriver::~adsAsynPortDriver() {
 void adsAsynPortDriver::cyclicThread() {
   const char *functionName = __FUNCTION__;
   double sampleTime = 0.5;
+  const double reconnectIntervalSecs = 5.0;
+  epicsTimeStamp lastReconnectTime = {};
   while (1) {
     asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Sample time [s]= %lf.\n",
               driverName, functionName, sampleTime);
@@ -544,7 +546,6 @@ void adsAsynPortDriver::cyclicThread() {
           asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
                     "%s:%s: connection failed for port %s.\n", driverName,
                     functionName, portName);
-          exit(-1);
         }
         if (!port->connectedOld && port->connected) {
           adsReadVersion(port);
@@ -592,16 +593,25 @@ void adsAsynPortDriver::cyclicThread() {
     }
 
     if (!oneAmsConnectionOK && autoConnect_) {
-      if (oneAmsConnectionOKold_) {
-        asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                  "%s:%s: No connection! Try to reconnect...\n", driverName,
-                  functionName);
-      }
       connectedAds_ = 0;
-      if ((notConnectedCounter_ & 2) == 2) {
+      // Retry reconnection every 5 seconds
+      epicsTimeStamp now;
+      epicsTimeGetCurrent(&now);
+      if (epicsTimeDiffInSeconds(&now, &lastReconnectTime) >=
+          reconnectIntervalSecs) {
         asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                  "cyclicThread: forcing disconnect.\n");
+                  "%s:%s: PLC unreachable, attempting reconnect...\n",
+                  driverName, functionName);
         disconnectLock(pasynUserSelf);
+        asynStatus reconnectStatus = connectLock(pasynUserSelf);
+        lastReconnectTime = now;
+        if (reconnectStatus != asynSuccess) {
+          asynPrint(pasynUserSelf, ASYN_TRACE_FLOW,
+                    "%s:%s: Reconnect failed.\n", driverName, functionName);
+        } else {
+          asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s: Reconnected.\n",
+                    driverName, functionName);
+        }
       }
     }
     oneAmsConnectionOKold_ = oneAmsConnectionOK;
@@ -3554,10 +3564,11 @@ asynStatus adsAsynPortDriver::adsGetSymInfoByName(uint16_t amsPort,
         driverName, functionName, varName, adsErrorToString(infoStatus),
         infoStatus);
     if (infoStatus == GLOBALERR_TARGET_PORT) {
-      /* Sigh.  It was up, now it's down.  Let's go home. */
+      /* Port went down. Return error and let the reconnection loop handle it.
+       */
       asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Port error, giving up!\n", driverName, functionName);
-      exit(1);
+                "%s:%s: Port error, connection will be retried.\n", driverName,
+                functionName);
     }
     return asynError;
   }
