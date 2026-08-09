@@ -1,5 +1,45 @@
+files: ^adsApp/src/
+
 repos:
+  # Standard hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: [--maxkb=500]
+  # C++ formatting 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v14.0.0
+    rev: v17.0.6
     hooks:
       - id: clang-format
+        types: [c++]
+        args: [--style=file]
+  # Static analysis 
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+      - id: cppcheck
+        args:
+          - --error-exitcode=1
+          - --language=c++
+          - --inline-suppr
+          - --suppress=missingInclude          # EPICS headers not on cppcheck path
+          - --suppress=unusedFunction          # many EPICS callbacks appear unused
+          - --suppress=normalCheckLevelMaxBranches  # informational only
+          - --suppress=arrayIndexThenCheck     # intentional short-circuit in bulk loop
+          - --suppress=dangerousTypeCast       # unavoidable on ADS wire buffers
+          - --suppress=invalidPointerCast      # unavoidable on ADS wire buffers
+          - --suppress=useInitializationList   # style preference, not a bug
+          - --suppress=virtualCallInConstructor  # known false positive for EPICS asyn pattern
+          - --suppress=nullPointerRedundantCheck  # false positive in octetCreateArgvSepv loop logic
+          - --enable=warning
+          - --enable=performance
+          - --enable=portability
+        types: [c++]
