@@ -1,0 +1,60 @@
+name: PCDS Standard CPP Testing
+
+on:
+  push:
+  pull_request:
+  release:
+    types:
+      - published
+
+jobs:
+  standard:
+    uses: pcdshub/pcds-ci-helpers/.github/workflows/cpp-standard.yml@master
+    with:
+      # The workflow can be configured to look at a specific project directory, if
+      # desirable.  This defaults to the root of the repository (".").
+      project-root: "."
+
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install pyads
+        run: pip install pyads
+      - name: Run smoke test
+        run: python3 tests/server/test_server_smoke.py
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/pcdshub/ioc-common-ads-ioc/ci:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Link RELEASE_SITE for CI workspace
+        run: |
+          ln -sf /cds/group/pcds/epics/${BASE_MODULE_VERSION}/modules/RELEASE_SITE \
+              $(dirname ${GITHUB_WORKSPACE})/RELEASE_SITE
+          ln -sf /cds/group/pcds/epics/${BASE_MODULE_VERSION}/modules/RELEASE_SITE.check \
+              $(dirname ${GITHUB_WORKSPACE})/RELEASE_SITE.check
+      - name: Start ADS test server
+        run: |
+          python3 tests/server/ads_test_server.py \
+            --json testIOC/iocBoot/ioc-TestIOC/ads_symbol_dict.json &
+          sleep 2
+      - name: Build driver
+        # Build libads with -DADS_UNIT_TEST so the test-only hooks
+        # (setGlobalInstance, g_callbackCount) are compiled into the library;
+        # the unit tests link against ads and reference them, so a plain
+        # `make -C adsApp` leaves them out and the test link fails.
+        run: make -C adsApp USR_CXXFLAGS+="-DADS_UNIT_TEST -DCONFIG_DEFAULT_LOGLEVEL=1"
+      - name: Build and run unit tests
+        run: |
+          make -C tests/unit
+          make -C tests/unit runtests
