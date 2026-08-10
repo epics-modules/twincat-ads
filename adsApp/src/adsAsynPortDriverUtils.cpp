@@ -1,32 +1,18 @@
 /*
-    This file is part of twincat-ads.
-
-    twincat-ads is free software: you can redistribute it and/or modify it under
-   the terms of the GNU Lesser General Public License as published by the Free
-   Software Foundation, either version 3 of the License, or (at your option) any
-   later version.
-
-    twincat-ads is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-   FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-   details.
-
-    You should have received a copy of the GNU Lesser General Public License
-   along with twincat-ads. If not, see <https://www.gnu.org/licenses/>.
-
+* adsAsynPortDriverUtils.cpp
+*
+* Utilities and definitions used by adsAsynPortDriver-class.
+*
+* Author: Anders Sandström
+*
+* Created January 30, 2018
 */
-/*
- * adsAsynPortDriverUtils.cpp
- *
- * Utilities and definitions used by adsAsynPortDriver-class.
- *
- */
 
 #include "adsAsynPortDriverUtils.h"
-#include "epicsTime.h"
-#include <initHooks.h>
-#include <stdlib.h>
 #include <string.h>
+#include <initHooks.h>
+#include "epicsTime.h"
+#include <stdexcept>
 
 typedef struct
 {
@@ -266,8 +252,7 @@ const char* adsTypeToString(long type)
 
 /** Convert asyn type enum to string.
  *
- * \param[in] type Asyn type (from asynDriver
- * https://github.com/epics-modules/asyn)
+ * \param[in] type Asyn type (from asynDriver https://github.com/epics-modules/asyn)
  *
  * \return Asyn type string.
  */
@@ -277,10 +262,6 @@ const char* asynTypeToString(long type)
     {
     case asynParamInt32:
         return "asynParamInt32";
-#ifndef NO_ADS_ASYN_ASYNPARAMINT64
-    case asynParamInt64:
-        return "asynParamInt64";
-#endif
     case asynParamFloat64:
         return "asynParamFloat64";
     case asynParamUInt32Digital:
@@ -299,6 +280,10 @@ const char* asynTypeToString(long type)
         return "asynParamFloat64Array";
     case asynParamGenericPointer:
         return "asynParamGenericPointer";
+    case asynParamInt64:
+        return "asynParamInt64";
+    case asynParamInt64Array:
+        return "asynParamInt64Array";
     default:
         return "asynUnknownType";
     }
@@ -414,7 +399,7 @@ size_t adsTypeSize(long type)
     case ADST_UINT64:
         return 8;
     case ADST_STRING:
-        return 1; // Array of char
+        return 1; //Array of char
     case ADST_WSTRING:
         return -1;
     case ADST_REAL80:
@@ -446,12 +431,6 @@ asynParamType dtypStringToAsynType(char* dtype)
     {
         return asynParamInt32;
     }
-#ifndef NO_ADS_ASYN_ASYNPARAMINT64
-    if (strcmp("asynInt64", dtype) == 0)
-    {
-        return asynParamInt64;
-    }
-#endif
     if (strcmp("asynInt8ArrayIn", dtype) == 0 || strcmp("asynInt8ArrayOut", dtype) == 0)
     {
         return asynParamInt8Array;
@@ -472,11 +451,16 @@ asynParamType dtypStringToAsynType(char* dtype)
     {
         return asynParamFloat64Array;
     }
-    if (strcmp("asynOctetRead", dtype) == 0 || strcmp("asynOctetWrite", dtype) == 0)
+    if (strcmp("asynInt64", dtype) == 0)
     {
-        return asynParamOctet;
+        return asynParamInt64;
+    }
+    if (strcmp("asynInt64ArrayIn", dtype) == 0 || strcmp("asynInt64ArrayOut", dtype) == 0)
+    {
+        return asynParamInt64Array;
     }
     //  asynParamUInt32Digital,
+    //  asynParamOctet,
     //  asynParamGenericPointer
 
     return asynParamNotDefined;
@@ -579,8 +563,7 @@ int windowsToEpicsTimeStamp(uint64_t plcTime, epicsTimeStamp* ts)
     {
         return 1;
     }
-    // move from WindowsTime to Epics time 1601 jan 1 to 1990 jan 1
-    // (POSIX_TIME_AT_EPICS_EPOCH defined in epicsTime.h)
+    //move from WindowsTime to Epics time 1601 jan 1 to 1990 jan 1 (POSIX_TIME_AT_EPICS_EPOCH defined in epicsTime.h)
     plcTime = plcTime - (POSIX_TIME_AT_EPICS_EPOCH + SEC_TO_UNIX_EPOCH) * WINDOWS_TICK_PER_SEC;
 
     ts->secPastEpoch = (uint32_t)(plcTime / WINDOWS_TICK_PER_SEC);
@@ -701,17 +684,29 @@ int octetClearBuffer(adsOctetOutputBufferType* buffer)
     return 0;
 }
 
-/** Octet interface: Divide line into commands.
+/**
+ * Parse a command line string into argument and separator vectors.
+ * Splits on ';' (preferred) or ' ' if found, otherwise treats the
+ * whole line as a single argument.
  *
- * \param[in] line Line of ASCII commands.
- * \param[out] argv_p Array of commands.
- * \param[out] sepv_p Array of separators.
+ * @param line    Input command line string to parse.
+ * @param argv_p  Output pointer to array of argument strings.
+ * @param sepv_p  Output pointer to array of separator strings.
+ * @return        Number of arguments parsed, or 0 on failure.
  *
- * \return 0 or error code.
+ * @note Caller is responsible for freeing argv_p and sepv_p arrays
+ *       and their contents.
  */
+
 int octetCreateArgvSepv(const char* line, const char*** argv_p, char*** sepv_p)
 {
-    char* input_line                   = strdup(line);
+    char* input_line = strdup(line);
+    if (!input_line)
+    {
+        fprintf(stderr, "%s: strdup failed\n", __func__);
+        return 0;
+    }
+
     size_t calloc_len                  = 2 + strlen(input_line);
     char* separator                    = NULL;
     static const size_t MAX_SEPARATORS = 4;
@@ -725,21 +720,35 @@ int octetCreateArgvSepv(const char* line, const char*** argv_p, char*** sepv_p)
     *argv_p = argv;
     if (argv == NULL)
     {
+        free(input_line);
         return 0;
     }
     sepv    = (char**)(void*)calloc(calloc_len, sizeof(char*));
     *sepv_p = sepv;
     if (sepv == NULL)
     {
+        free(input_line);
         return 0;
     }
     /* argv[0] is the whole line */
     {
+        //    size_t line_len = strlen(input_line);
         argv[argc] = strdup(input_line);
         sepv[argc] = (char*)calloc(1, MAX_SEPARATORS);
+
+        //    if (argv0_semicolon_is_sep &&
+        //        (line_len > 1) && (input_line[line_len-1] == ';')) {
+        //      /* Special: the last character is ; move it from
+        //         input line into the separator */
+        //      char *sep = (char *)sepv[argc];
+        //      sep[0] = ';';
+        //      sep = (char *)&argv[argc][line_len-1];
+        //      sep[0] = '\0';
+        //    }
     }
     if (!strlen(input_line))
     {
+        free(input_line);
         return argc;
     }
     if (strchr(input_line, ';') != NULL)
@@ -801,6 +810,19 @@ int octetCreateArgvSepv(const char* line, const char*** argv_p, char*** sepv_p)
 
     free(input_line);
 
+    //  if (PRINT_STDOUT_BIT2()) {
+    //    int i;
+    //    /****  Print what we have */
+    //    fprintf(stdout, "%s/%s:%d argc=%d calloc_len=%u\n",
+    //            __FILE__, __FUNCTION__, __LINE__,
+    //            argc, (unsigned)calloc_len);
+    //    for(i=0; i <= argc;i++) {
+    //      fprintf(stdout, "%s/%s:%d argv[%d]=\"%s\" sepv[%d]=\"%s\"\n",
+    //              __FILE__, __FUNCTION__, __LINE__,
+    //              i, argv[i] ? argv[i] : "NULL",
+    //              i, sepv[i] ? sepv[i] : "NULL");
+    //    }
+    //  }
     return argc;
 }
 
@@ -826,7 +848,7 @@ int octetBinary2ascii(bool returnVarName,
 
     while (bytesProcessed < info->size && !error)
     {
-        // write comma for arrays
+        //write comma for arrays
         if (bytesProcessed != 0)
         {
             octetCmdBuf_printf(asciiBuffer, ",");
@@ -838,6 +860,7 @@ int octetBinary2ascii(bool returnVarName,
             int8_t* ADST_INT8Var;
             ADST_INT8Var = ((int8_t*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "%hhd", *ADST_INT8Var);
+            //printf("Binary 2 ASCII ADST_INT8, value: %d\n", *ADST_INT8Var);
             bytesPerDataPoint = 1;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -846,6 +869,7 @@ int octetBinary2ascii(bool returnVarName,
             int16_t* ADST_INT16Var;
             ADST_INT16Var = ((int16_t*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "%d", *ADST_INT16Var);
+            //printf("Binary 2 ASCII ADST_INT16, value: %d\n", *ADST_INT16Var);
             bytesPerDataPoint = 2;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -854,6 +878,7 @@ int octetBinary2ascii(bool returnVarName,
             int32_t* ADST_INT32Var;
             ADST_INT32Var = ((int32_t*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "%d", *ADST_INT32Var);
+            //printf("Binary 2 ASCII ADST_INT32, value: %d\n", *ADST_INT32Var);
             bytesPerDataPoint = 4;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -862,6 +887,7 @@ int octetBinary2ascii(bool returnVarName,
             int64_t* ADST_INT64Var;
             ADST_INT64Var = ((int64_t*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "% PRId64", *ADST_INT64Var);
+            //printf("Binary 2 ASCII ADST_INT64, value: %" PRId64 "\n", *ADST_INT64Var);
             bytesPerDataPoint = 8;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -870,6 +896,7 @@ int octetBinary2ascii(bool returnVarName,
             uint8_t* ADST_UINT8Var;
             ADST_UINT8Var = ((uint8_t*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "%hhu", *ADST_UINT8Var);
+            //printf("Binary 2 ASCII ADST_UINT8, value: %d\n", *ADST_UINT8Var);
             bytesPerDataPoint = 1;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -878,6 +905,7 @@ int octetBinary2ascii(bool returnVarName,
             uint16_t* ADST_UINT16Var;
             ADST_UINT16Var = ((uint16_t*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "%d", *ADST_UINT16Var);
+            //printf("Binary 2 ASCII ADST_UINT16, value: %d\n", *ADST_UINT16Var);
             bytesPerDataPoint = 2;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -886,6 +914,7 @@ int octetBinary2ascii(bool returnVarName,
             uint32_t* ADST_UINT32Var;
             ADST_UINT32Var = ((uint32_t*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "%d", *ADST_UINT32Var);
+            //printf("Binary 2 ASCII ADST_UINT32, value: %d\n", *ADST_UINT32Var);
             bytesPerDataPoint = 4;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -894,6 +923,7 @@ int octetBinary2ascii(bool returnVarName,
             uint64_t* ADST_UINT64Var;
             ADST_UINT64Var = ((uint64_t*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "% PRIu64", *ADST_UINT64Var);
+            //printf("Binary 2 ASCII ADST_UINT64, value: %" PRIu64 "\n", *ADST_UINT64Var);
             bytesPerDataPoint = 8;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -902,6 +932,7 @@ int octetBinary2ascii(bool returnVarName,
             float* ADST_REAL32Var;
             ADST_REAL32Var = ((float*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "%f", *ADST_REAL32Var);
+            //printf("Binary 2 ASCII ADST_REAL32, value: %lf\n", *ADST_REAL32Var);
             bytesPerDataPoint = 4;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -910,6 +941,7 @@ int octetBinary2ascii(bool returnVarName,
             double* ADST_REAL64Var;
             ADST_REAL64Var = ((double*)binaryBuffer) + cycles;
             octetCmdBuf_printf(asciiBuffer, "%lf", *ADST_REAL64Var);
+            //printf("Binary 2 ASCII ADST_REAL64, value: %lf\n", *ADST_REAL64Var);
             bytesPerDataPoint = 8;
             bytesProcessed += bytesPerDataPoint;
             break;
@@ -925,25 +957,27 @@ int octetBinary2ascii(bool returnVarName,
             {
                 octetCmdBuf_printf(asciiBuffer, "0");
             }
-            bytesPerDataPoint = 1; // TODO: Check if each bit takes one byte or
-                                   // actually only one bit?!
+            bytesPerDataPoint =
+                1; //TODO: Check if each bit takes one byte or actually only one bit?!
             bytesProcessed += bytesPerDataPoint;
+            //printf("Binary 2 ASCII ADST_BIT, value: %c\n", *charVar);
             break;
         case ADST_STRING:
             RETURN_VAR_NAME_IF_NEEDED;
             char* ADST_STRINGVar;
             ADST_STRINGVar = (char*)binaryBuffer;
             octetCmdBuf_printf(asciiBuffer, "%s", ADST_STRINGVar);
+            //printf("Binary 2 ASCII ADST_STRING, value: %s\n", ADST_STRINGVar);
             bytesProcessed = info->size;
             break;
         case ADST_BIGTYPE:
             if (strstr(info->symDataType, DUT_AXIS_STATUS) != NULL)
             {
-                // RETURN_VAR_NAME_IF_NEEDED;
+                //RETURN_VAR_NAME_IF_NEEDED;
                 octetCmdBuf_printf(
                     asciiBuffer,
                     "%s=",
-                    info->variableName); // Always output variable name for stAxisStatus
+                    info->variableName); //Always output variable name for stAxisStatus
                 adsOctetSTAXISSTATUSSTRUCT* stAxisData;
                 stAxisData = (adsOctetSTAXISSTATUSSTRUCT*)binaryBuffer;
 
@@ -1054,12 +1088,14 @@ int octetBinary2ascii(bool returnVarName,
                 {
                     octetCmdBuf_printf(asciiBuffer, "0;");
                 }
+                //printf("Binary 2 ASCII ADST_BIGTYPE, type: %s\n", info->symDataType);
                 bytesProcessed = info->size;
-                break; // end DUT_AXIS_STATUS
+                break; //end DUT_AXIS_STATUS
             }
             break;
         default:
-            error             = ADS_COM_ERROR_INVALID_DATA_TYPE;
+            error = ADS_COM_ERROR_INVALID_DATA_TYPE;
+            //printf("Data type %s (%d) not implemented. Error: %d\n", info->symDataType, info->dataType,error);
             bytesPerDataPoint = 0;
             break;
         }
@@ -1068,10 +1104,12 @@ int octetBinary2ascii(bool returnVarName,
         if (binaryBufferSize < bytesProcessed + bytesPerDataPoint)
         {
             error = ADS_COM_ERROR_ADS_READ_BUFFER_INDEX_EXCEEDED_SIZE;
+            //printf("Buffer size exceeded. Error: %d\n",error);
         }
         if ((asciiBuffer->bufferSize - asciiBuffer->bytesUsed) < 20)
         {
             error = ADS_COM_ERROR_BUFFER_TO_EPICS_FULL;
+            //printf("Buffer size exceeded. Error: %d\n",error);
         }
     }
     return error;
@@ -1174,21 +1212,23 @@ int octetAscii2binary(const char* asciiBuffer,
             break;
         case ADST_BIT:
             char* charVar;
-            charVar           = ((char*)binaryBuffer) + cycles;
-            converted         = sscanf(asciiBuffer, "%hhu", (charVar));
-            bytesPerDataPoint = 1; // TODO: Check if each bit takes one byte or
-                                   // actually only one bit?!
+            charVar   = ((char*)binaryBuffer) + cycles;
+            converted = sscanf(asciiBuffer, "%hhu", (unsigned char*)(charVar));
+            bytesPerDataPoint =
+                1; //TODO: Check if each bit takes one byte or actually only one bit?!
             *bytesProcessed += bytesPerDataPoint;
             break;
         case ADST_STRING:
             char* stringVar;
-            stringVar         = ((char*)binaryBuffer);
-            converted         = sscanf(asciiBuffer, "%s", stringVar);
-            bytesPerDataPoint = 1; // TODO: Check if each bit takes one byte or
-                                   // actually only one bit?!
+            stringVar = ((char*)binaryBuffer);
+            // cppcheck-suppress invalidscanf
+            converted = sscanf(asciiBuffer, "%s", stringVar);
+            bytesPerDataPoint =
+                1; //TODO: Check if each bit takes one byte or actually only one bit?!
             *bytesProcessed = binaryBufferSize;
             break;
         default:
+            //printf("ERROR: Data type: %d not implemented.\n",dataType);
             error             = ADS_COM_ERROR_INVALID_DATA_TYPE;
             bytesPerDataPoint = 0;
             break;
@@ -1208,4 +1248,38 @@ int octetAscii2binary(const char* asciiBuffer,
     } while (asciiBuffer != NULL && converted != 0 && !error);
 
     return error;
+}
+
+AmsClientPortEntry::AmsClientPortEntry(long port, int liveCount) : port(port), liveCount(liveCount)
+{
+}
+
+bool isInvalidPortNumber(long clientPortNumber)
+{
+    return (clientPortNumber) <= 0 || (clientPortNumber) > UINT16_MAX;
+}
+
+std::string string_format(const char* fmt, ...)
+{
+    va_list args;
+
+    // First, determine the size needed
+    va_start(args, fmt);
+    int size = std::vsnprintf(nullptr, 0, fmt, args);
+    va_end(args);
+
+    if (size < 0)
+    {
+        throw std::runtime_error("Formatting error");
+    }
+
+    // Allocate string of the required size
+    std::vector<char> buffer(size + 1);
+
+    // Format into the buffer
+    va_start(args, fmt);
+    std::vsnprintf(buffer.data(), buffer.size(), fmt, args);
+    va_end(args);
+
+    return std::string(buffer.data(), size);
 }

@@ -1,39 +1,22 @@
 /*
-    This file is part of twincat-ads.
-
-    twincat-ads is free software: you can redistribute it and/or modify it under
-   the terms of the GNU Lesser General Public License as published by the Free
-   Software Foundation, either version 3 of the License, or (at your option) any
-   later version.
-
-    twincat-ads is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-   FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
-   details.
-
-    You should have received a copy of the GNU Lesser General Public License
-   along with twincat-ads. If not, see <https://www.gnu.org/licenses/>.
-
+* adsAsynPortDriverUtils.h
+*
+* Utilities and definitions used by adsAsynPortDriver-class.
+*
+* Author: Anders Sandström
+*
+* Created January 30, 2018
 */
-/*
- * adsAsynPortDriverUtils.h
- *
- * Utilities and definitions used by adsAsynPortDriver-class.
- *
- * Author: Anders Sandström
- *
- * Created January 30, 2018
- */
 
 #ifndef ADSASYNPORTDRIVERUTILS_H_
 #define ADSASYNPORTDRIVERUTILS_H_
 
-#include "AdsLib.h"         //error codes
 #include "asynPortDriver.h" //data types
+#include "AdsLib.h"         //error codes
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 
-// Error codes
+//Error codes
 #define ADS_COM_ERROR_INVALID_DATA_TYPE 1004
 #define ADS_COM_ERROR_ADS_READ_BUFFER_INDEX_EXCEEDED_SIZE 1005
 #define ADS_COM_ERROR_BUFFER_TO_EPICS_FULL 1006
@@ -43,7 +26,7 @@
 #define ADS_ADR_COMMAND_PREFIX ".ADR."
 #define ADS_OPTION_T_MAX_DLY_MS "T_DLY_MS"
 #define ADS_OPTION_T_SAMPLE_RATE_MS "TS_MS"
-#define ADS_OPTION_TIMEBASE "TIMEBASE" // PLC or EPICS
+#define ADS_OPTION_TIMEBASE "TIMEBASE" //PLC or EPICS
 #define ADS_OPTION_POLLRATE "POLL_RATE"
 #define ADS_OPTION_TIMEBASE_EPICS "EPICS"
 #define ADS_OPTION_TIMEBASE_PLC "PLC"
@@ -64,58 +47,59 @@ typedef enum
 
 typedef enum
 {
-    ADS_DATASOURCE_PLC       = 0, // Data in PLC (Normal/default)
-    ADS_DATASOURCE_AMS_STATE = 1, // Special case parameter linked to ads status (not plc "data")
+    ADS_DATASOURCE_PLC       = 0, //Data in PLC (Normal/default)
+    ADS_DATASOURCE_AMS_STATE = 1, //Special case parameter linked to ads status (not plc "data")
     ADS_DATASOURCE_MAX       = 2,
 } ADSDATASOURCE;
 
 typedef struct adsParamInfo
 {
-    char* recordName;
-    char* recordType;
-    char* scan;
-    char* dtyp;
-    char* inp;
-    char* out;
-    char* drvInfo;
-    asynParamType asynType;
-    int asynAddr;
-    bool hasInput;
-    double sampleTimeMS;   // milli seconds
-    double maxDelayTimeMS; // milli seconds
-    uint16_t amsPort;
-    int paramIndex;      // also used as hUser for ads callback
-    bool plcAbsAdrValid; // Symbolic address converted to abs address or .ADR.
-                         // command parsed
-    bool isAdrCommand;
-    bool isBulkRead;
-    double pollClass;
-    char* plcAdrStr;
-    uint32_t plcAbsAdrGroup;
-    uint32_t plcAbsAdrOffset;
-    uint32_t plcSize;
-    uint32_t plcDataType;
-    bool plcDataTypeWarn;
-    bool plcDataIsArray;
-    uint32_t hCallbackNotify;
-    bool bCallbackNotifyValid;
-    uint32_t hSymbolicHandle;
-    bool bSymbolicHandleValid;
-    size_t lastCallbackSize;
-    size_t arrayDataBufferSize;
-    void* arrayDataBuffer;
-    bool refreshNeeded;       // Communication broken update handles and callbacks
-    ADSDATASOURCE dataSource; // Variable in PLC or in driver (not in PLC)
-    // timing
-    ADSTIMESOURCE timeBase;
-    uint64_t plcTimeStampRaw;
-    epicsTimeStamp plcTimeStamp;
-    epicsTimeStamp epicsTimestamp;
-    int alarmStatus;
-    int alarmSeverity;
-    bool firstReadDone;
-    int bulkIndex;
-    int bulkOffset;
+    char* recordName       = nullptr;
+    char* recordType       = nullptr;
+    char* scan             = nullptr;
+    char* dtyp             = nullptr;
+    char* inp              = nullptr;
+    char* out              = nullptr;
+    char* drvInfo          = nullptr;
+    asynParamType asynType = asynParamType::asynParamNotDefined;
+    int asynAddr           = 0;
+    bool isIOIntr          = false;
+    double sampleTimeMS    = 0; //milli seconds
+    double maxDelayTimeMS  = 0; //milli seconds
+    uint16_t amsPort       = 0;
+    int paramIndex         = 0;  //also used as hUser for ads callback
+    bool plcAbsAdrValid = false; //Symbolic address converted to abs address or .ADR. command parsed
+    bool isAdrCommand   = false;
+    bool isBulkRead     = false;
+    double pollClass    = 0;
+    char* plcAdrStr     = nullptr;
+    uint32_t plcAbsAdrGroup    = 0;
+    uint32_t plcAbsAdrOffset   = 0;
+    uint32_t plcSize           = 0;
+    uint32_t plcDataType       = 0;
+    bool plcDataTypeWarn       = false;
+    bool plcDataIsArray        = false;
+    uint32_t hCallbackNotify   = 0;
+    bool bCallbackNotifyValid  = false;
+    uint32_t hSymbolicHandle   = 0;
+    bool bSymbolicHandleValid  = false;
+    size_t lastCallbackSize    = 0;
+    size_t arrayDataBufferSize = 0;
+    void* arrayDataBuffer      = nullptr;
+    //Communication broken update handles and callbacks
+    bool refreshNeeded = false;
+    //Variable in PLC or in driver (not in PLC)
+    ADSDATASOURCE dataSource = ADSDATASOURCE::ADS_DATASOURCE_PLC;
+    //timing
+    ADSTIMESOURCE timeBase        = ADSTIMESOURCE::ADS_TIME_BASE_PLC;
+    uint64_t plcTimeStampRaw      = 0;
+    epicsTimeStamp plcTimeStamp   = {0, 0};
+    epicsTimeStamp epicsTimestamp = {0, 0};
+    int alarmStatus               = 0;
+    int alarmSeverity             = 0;
+    bool firstReadDone            = false;
+    int bulkIndex                 = 0;
+    int bulkOffset                = 0;
 } adsParamInfo;
 
 typedef struct amsPortInfo
@@ -131,11 +115,10 @@ typedef struct amsPortInfo
     adsParamInfo* paramInfo;
     uint32_t hCallbackNotify;
     bool bCallbackNotifyValid;
-    bool refreshNeeded; // Communication broken update handles and callbacks
+    bool refreshNeeded; //Communication broken update handles and callbacks
 } amsPortInfo;
 
-// For info from symbolic name Actually this data type should be in the adslib
-// (but missing)..
+//For info from symbolic name Actually this data type should be in the adslib (but missing)..
 typedef struct
 {
     uint32_t entryLen;
@@ -147,7 +130,7 @@ typedef struct
     uint16_t nameLength;
     uint16_t typeLength;
     uint16_t commentLength;
-    char buffer[768]; // 256*3, 256 is string size in TwinCAT then 768 is max
+    char buffer[768]; //256*3, 256 is string size in TwinCAT then 768 is max
     char* variableName;
     char* symDataType;
     char* symComment;
@@ -182,6 +165,7 @@ const char* epicsStateToString(int state);
 size_t adsTypeSize(long type);
 asynParamType dtypStringToAsynType(char* dtype);
 int windowsToEpicsTimeStamp(uint64_t plcTime, epicsTimeStamp* ts);
+
 
 /**
  * Octet interface functions and definitions
@@ -218,5 +202,16 @@ int octetAscii2binary(const char* asciiBuffer,
                       void* binaryBuffer,
                       uint32_t binaryBufferSize,
                       uint32_t* bytesProcessed);
+
+struct AmsClientPortEntry
+{
+    AmsClientPortEntry(long port, int liveCount);
+    long port;
+    int liveCount;
+};
+
+bool isInvalidPortNumber(long clientPortNumber);
+
+std::string string_format(const char* fmt, ...);
 
 #endif /* ADSASYNPORTDRIVERUTILS_H_ */
