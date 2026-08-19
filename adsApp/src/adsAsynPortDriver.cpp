@@ -783,12 +783,25 @@ void adsAsynPortDriver::report(FILE *fp, int details) {
               (paramInfo->timeBase == ADS_TIME_BASE_PLC)
                   ? ADS_OPTION_TIMEBASE_PLC
                   : ADS_OPTION_TIMEBASE_EPICS);
-      fprintf(fp, "    Param plc time:            %us:%uns\n",
-              paramInfo->plcTimeStamp.secPastEpoch,
-              paramInfo->plcTimeStamp.nsec);
-      fprintf(fp, "    Param epics time:          %us:%uns\n",
-              paramInfo->epicsTimestamp.secPastEpoch,
-              paramInfo->epicsTimestamp.nsec);
+      {
+        char buf[40];
+        buf[0] = '\0';
+        epicsTimeToStrftime(buf, sizeof(buf), "%Y %H:%M:%S.%f",
+                            &paramInfo->plcTimeStamp);
+        fprintf(fp, "    Param plc time:            %us:%uns (%s)\n",
+                paramInfo->plcTimeStamp.secPastEpoch,
+                paramInfo->plcTimeStamp.nsec, buf);
+      }
+
+      {
+        char buf[40];
+        buf[0] = '\0';
+        epicsTimeToStrftime(buf, sizeof(buf), "%Y %H:%M:%S.%f",
+                            &paramInfo->epicsTimestamp);
+        fprintf(fp, "    Param epics time:          %us:%uns (%s)\n",
+                paramInfo->epicsTimestamp.secPastEpoch,
+                paramInfo->epicsTimestamp.nsec, buf);
+      }
       fprintf(fp, "    Param array buffer alloc:  %s\n",
               paramInfo->arrayDataBuffer ? "true" : "false");
       fprintf(fp, "    Param array buffer size:   %lu\n",
