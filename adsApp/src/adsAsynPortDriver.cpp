@@ -442,9 +442,14 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
     long error = 0;
     uint16_t adsState = 0;
     if (adsReadStateLock(amsport, &adsState, true, &error) != asynSuccess) {
-      asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: adsReadStateLock failed for port '%s' error=0x%lx\n",
-                driverName, functionName, portName, error);
+      asynPrint(
+          pasynUserSelf, ASYN_TRACE_ERROR,
+          "%s:%s: adsReadStateLock failed for port '%s' error='%s' (0x%lx)\n",
+          driverName, functionName, portName,
+          (error == GLOBALERR_TARGET_PORT)
+              ? "Target port not found, PLC program possibly not started"
+              : adsErrorToString(error),
+          error);
       disconnect(pasynUserSelf);
       epicsThreadSleep(5.0);
       continue;
@@ -5111,7 +5116,11 @@ asynStatus adsAsynPortDriver::adsAddRouteLock() {
   if (addRouteStatus) {
     asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
               "%s:%s: Adding ADS route failed with: %s (0x%lx).\n", driverName,
-              functionName, adsErrorToString(addRouteStatus), addRouteStatus);
+              functionName,
+              (addRouteStatus == GLOBALERR_TARGET_PORT)
+                  ? "Target port not found, ADS server possibly not started"
+                  : adsErrorToString(addRouteStatus),
+              addRouteStatus);
     return asynError;
   }
   routeAdded_ = 1;
