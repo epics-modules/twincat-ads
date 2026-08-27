@@ -55,6 +55,14 @@ static adsAsynPortDriver *adsAsynPortObj;
 static long oldTimeStamp = 0;
 static struct timeval oldTime = {0};
 static int allowCallbackEpicsState = 0;
+// Worker-thread lifecycle
+// Cooperative shutdown so the destructor can stop and join the worker
+// threads before releasing handles / freeing adsParamArray_ / closing the
+// ADS port. Without this, the still-running cyclic/bulk threads race the
+// destructor on the shared AmsRouter (teardown hang) or it frees memory out
+// from under them (use-after-free crash).
+epicsThreadId cyclicThreadId_{nullptr};
+static int stopThreads_ = 0;
 static initHookState currentEpicsState = initHookAtIocBuild;
 
 /** Callback hook for EPICS state.
@@ -68,6 +76,8 @@ static void getEpicsState(initHookState state) {
   static struct timeval start;
   struct timeval now, diff;
 
+  printf("%s/%s:%d initHookState=%d\n", __FILE__, __FUNCTION__, __LINE__,
+         (int)state);
   if (!adsAsynPortObj) {
     printf("%s:%s: ERROR: adsAsynPortObj==NULL\n", driverName, functionName);
     return;
@@ -98,6 +108,13 @@ static void getEpicsState(initHookState state) {
     adsAsynPortObj->fireAllCallbacksLock();
     adsAsynPortObj->bulkOK = 1;
     printf("Begin polling PLC!\n");
+    break;
+  case initHookAtShutdown:
+    stopThreads_ = 1;
+    if (cyclicThreadId_) {
+      epicsThreadMustJoin(cyclicThreadId_);
+      cyclicThreadId_ = nullptr;
+    }
     break;
   default:
     break;
@@ -394,13 +411,16 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
   }
 
   //* Create the thread that computes the waveforms in the background */
-  status = (asynStatus)(epicsThreadCreate(
-                            "adsAsynPortDriverCyclicThread",
-                            epicsThreadPriorityMedium,
-                            epicsThreadGetStackSize(epicsThreadStackMedium),
-                            (EPICSTHREADFUNC)::cyclicThread, this) == NULL);
-
-  if (status) {
+  {
+    epicsThreadOpts opts = EPICS_THREAD_OPTS_INIT;
+    opts.priority = epicsThreadPriorityMedium;
+    opts.stackSize = epicsThreadGetStackSize(epicsThreadStackMedium);
+    opts.joinable = 1; // joined in ~adsAsynPortDriver()
+    cyclicThreadId_ =
+        epicsThreadCreateOpt("adsAsynPortDriverCyclicThread",
+                             (EPICSTHREADFUNC)::cyclicThread, this, &opts);
+  }
+  if (cyclicThreadId_ == NULL) {
     printf("%s:%s: epicsThreadCreate failure\n", driverName, functionName);
     return;
   }
@@ -470,16 +490,24 @@ adsAsynPortDriver::~adsAsynPortDriver() {
   const char *functionName = __FUNCTION__;
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
-
-  free(ipaddr_);
-  free(amsaddr_);
+  // Stop and join the worker threads BEFORE releasing symbolic handles,
+  // freeing adsParamArray_ or closing the ADS port. The cyclic and bulk-read
+  // threads issue synchronous ADS requests on the shared AmsRouter; if they
+  // are still running while this destructor does the same and frees their
+  // data, teardown either hangs (all threads blocked in AmsResponse::Wait) or
+  // crashes (use-after-free on adsParamArray_/amsPortList_).
+  stopThreads_ = 1;
+  if (cyclicThreadId_) {
+    epicsThreadMustJoin(cyclicThreadId_);
+    cyclicThreadId_ = nullptr;
+  }
 
   for (int i = 0; i < adsParamArrayCount_; i++) {
     if (!pAdsParamArray_[i]) {
       continue;
     }
-    adsDelDataCallback(pAdsParamArray_[i], true);       // Block error messages
-    adsReleaseSymbolicHandle(pAdsParamArray_[i], true); // Block error messages
+    adsDelDataCallback(pAdsParamArray_[i], false);       // Block error messages
+    adsReleaseSymbolicHandle(pAdsParamArray_[i], false); // Block error messages
     free(pAdsParamArray_[i]->recordName);
     free(pAdsParamArray_[i]->recordType);
     free(pAdsParamArray_[i]->scan);
@@ -493,6 +521,9 @@ adsAsynPortDriver::~adsAsynPortDriver() {
     }
     delete pAdsParamArray_[i];
   }
+  free(ipaddr_);
+  free(amsaddr_);
+
   delete pAdsParamArray_;
 
   for (amsPortInfo *port : amsPortList_) {
@@ -517,6 +548,17 @@ void adsAsynPortDriver::cyclicThread() {
     epicsThreadSleep(sampleTime);
     if (!allowCallbackEpicsState) {
       continue; // Epics not started
+    }
+    if (allowCallbackEpicsState && stopThreads_) {
+      for (int i = 0; i < adsParamArrayCount_; i++) {
+        if (!pAdsParamArray_[i]) {
+          continue;
+        }
+        adsDelDataCallback(pAdsParamArray_[i], false); // Block error messages
+        adsReleaseSymbolicHandle(pAdsParamArray_[i],
+                                 false); // Block error messages
+      }
+      return; // driver is being destroyed — exit before issuing ADS I/O
     }
 
     uint16_t adsState = 0;
@@ -3501,27 +3543,31 @@ asynStatus adsAsynPortDriver::adsDelDataCallback(adsParamInfo *paramInfo,
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
-  paramInfo->bCallbackNotifyValid = false;
-
   AmsAddr amsServer;
   amsServer = {remoteNetId_, paramInfo->amsPort};
 
   adsLock();
   const long delStatus = AdsSyncDelDeviceNotificationReqEx(
       adsPort_, &amsServer, paramInfo->hCallbackNotify);
-  paramInfo->hCallbackNotify = -1;
   adsUnlock();
   if (delStatus) {
     if (!blockErrorMsg) {
       asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Delete device notification failed with: %s (0x%lx)\n",
-                driverName, functionName, adsErrorToString(delStatus),
+                "%s:%s: Delete device notification '%s' 0x%x failed with: %s "
+                "(0x%lx)\n",
+                driverName, functionName, paramInfo->plcAdrStr,
+                paramInfo->hCallbackNotify, adsErrorToString(delStatus),
                 delStatus);
     }
-    return asynError;
+  } else {
+    asynPrint(pasynUserSelf, ASYN_TRACE_INFO,
+              "%s:%s: Delete device notification '%s' OK\n", driverName,
+              functionName, paramInfo->plcAdrStr);
   }
+  paramInfo->bCallbackNotifyValid = false;
+  paramInfo->hCallbackNotify = -1;
 
-  return asynSuccess;
+  return delStatus ? asynError : asynSuccess;
 }
 
 /** Get symbolic information for a plc variable.
@@ -3821,17 +3867,22 @@ asynStatus adsAsynPortDriver::adsReleaseSymbolicHandle(adsParamInfo *paramInfo,
         adsPort_, &amsServer, ADSIGRP_SYM_RELEASEHND, 0,
         sizeof(paramInfo->hSymbolicHandle), &paramInfo->hSymbolicHandle);
     adsUnlock();
+    if (releaseStatus) {
+      if (!blockErrorMsg) {
+        asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+                  "%s:%s: Release of handle 0x%x failed with: %s (0x%lx)\n",
+                  driverName, functionName, paramInfo->hSymbolicHandle,
+                  adsErrorToString(releaseStatus), releaseStatus);
+      }
+    } else {
+      asynPrint(pasynUserSelf, ASYN_TRACE_INFO,
+                "%s:%s: Release of handle '%s' 0x%x OK\n", driverName,
+                functionName, paramInfo->plcAdrStr, paramInfo->hSymbolicHandle);
+    }
     paramInfo->hSymbolicHandle = -1;
     paramInfo->bSymbolicHandleValid = false;
-    if (releaseStatus && !blockErrorMsg) {
-      asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Release of handle 0x%x failed with: %s (0x%lx)\n",
-                driverName, functionName, paramInfo->hSymbolicHandle,
-                adsErrorToString(releaseStatus), releaseStatus);
-      return asynError;
-    }
+    return releaseStatus ? asynError : asynSuccess;
   }
-
   return asynSuccess;
 }
 
