@@ -536,6 +536,8 @@ const char *epicsStateToString(int state) {
   case initHookAfterInterruptAccept:
     return "initHookAfterInterruptAccept";
     break;
+  case initHookAtShutdown:
+    return "initHookAtShutdown";
   default:
     return "Unknown state";
     break;

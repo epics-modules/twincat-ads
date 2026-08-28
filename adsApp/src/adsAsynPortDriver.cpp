@@ -75,9 +75,9 @@ static void getEpicsState(initHookState state) {
   const char *functionName = __FUNCTION__;
   static struct timeval start;
   struct timeval now, diff;
+  int oldStopThreads = stopThreads_;
+  int oldAllowCallbackEpicsState = allowCallbackEpicsState;
 
-  printf("%s/%s:%d initHookState=%d\n", __FILE__, __FUNCTION__, __LINE__,
-         (int)state);
   if (!adsAsynPortObj) {
     printf("%s:%s: ERROR: adsAsynPortObj==NULL\n", driverName, functionName);
     return;
@@ -93,21 +93,17 @@ static void getEpicsState(initHookState state) {
   case initHookAfterInitDatabase:
     gettimeofday(&now, NULL);
     timersub(&now, &start, &diff);
-    printf("Database initialization took %ld.%05ld seconds.\n", diff.tv_sec,
-           (long)diff.tv_usec);
+    asynPrint(asynTraceUser, ASYN_TRACE_INFO,
+              "%s:%s: Database initialization took %ld.%05ld seconds\n",
+              driverName, functionName, (long)diff.tv_sec, (long)diff.tv_usec);
     break;
   case initHookAfterScanInit:
     allowCallbackEpicsState = 1;
 
     // make all callbacks if data arrived from callback before interrupts were
     // registered (before allowCallbackEpicsState==1)
-    if (!adsAsynPortObj) {
-      printf("%s:%s: ERROR: adsAsynPortObj==NULL\n", driverName, functionName);
-      return;
-    }
     adsAsynPortObj->fireAllCallbacksLock();
     adsAsynPortObj->bulkOK = 1;
-    printf("Begin polling PLC!\n");
     break;
   case initHookAtShutdown:
     stopThreads_ = 1;
@@ -121,10 +117,18 @@ static void getEpicsState(initHookState state) {
   }
 
   currentEpicsState = state;
-  asynPrint(asynTraceUser, ASYN_TRACEIO_DRIVER,
-            "%s:%s: EPICS state: %s (%d). Allow ADS callbacks: %s.\n",
+  unsigned traceMask = ASYN_TRACEIO_DRIVER;
+
+  if ((oldStopThreads != stopThreads_) ||
+      (oldAllowCallbackEpicsState != allowCallbackEpicsState)) {
+    traceMask |= ASYN_TRACE_INFO;
+  }
+  asynPrint(asynTraceUser, traceMask,
+            "%s:%s: EPICS state='%s' (%d). allowCallbackEpicsState=%s "
+            "stopThreads=%s\n",
             driverName, functionName, epicsStateToString((int)state),
-            (int)state, allowCallbackEpicsState ? "true" : "false");
+            (int)state, allowCallbackEpicsState ? "true" : "false",
+            stopThreads_ ? "true" : "false");
 }
 
 /** Register EPICS hook function
@@ -3561,7 +3565,7 @@ asynStatus adsAsynPortDriver::adsDelDataCallback(adsParamInfo *paramInfo,
                   delStatus);
       }
     } else {
-      asynPrint(pasynUserSelf, ASYN_TRACE_INFO,
+      asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
                 "%s:%s: Delete device notification '%s' OK\n", driverName,
                 functionName, paramInfo->plcAdrStr);
     }
@@ -3877,7 +3881,7 @@ asynStatus adsAsynPortDriver::adsReleaseSymbolicHandle(adsParamInfo *paramInfo,
                   adsErrorToString(releaseStatus), releaseStatus);
       }
     } else {
-      asynPrint(pasynUserSelf, ASYN_TRACE_INFO,
+      asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
                 "%s:%s: Release of handle '%s' 0x%x OK\n", driverName,
                 functionName, paramInfo->plcAdrStr, paramInfo->hSymbolicHandle);
     }
