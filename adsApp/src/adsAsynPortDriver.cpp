@@ -3543,31 +3543,33 @@ asynStatus adsAsynPortDriver::adsDelDataCallback(adsParamInfo *paramInfo,
   asynPrint(pasynUserSelf, ASYN_TRACE_FLOW, "%s:%s:\n", driverName,
             functionName);
 
-  AmsAddr amsServer;
-  amsServer = {remoteNetId_, paramInfo->amsPort};
+  if (paramInfo->bCallbackNotifyValid) {
+    AmsAddr amsServer;
+    amsServer = {remoteNetId_, paramInfo->amsPort};
 
-  adsLock();
-  const long delStatus = AdsSyncDelDeviceNotificationReqEx(
-      adsPort_, &amsServer, paramInfo->hCallbackNotify);
-  adsUnlock();
-  if (delStatus) {
-    if (!blockErrorMsg) {
-      asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
-                "%s:%s: Delete device notification '%s' 0x%x failed with: %s "
-                "(0x%lx)\n",
-                driverName, functionName, paramInfo->plcAdrStr,
-                paramInfo->hCallbackNotify, adsErrorToString(delStatus),
-                delStatus);
+    adsLock();
+    const long delStatus = AdsSyncDelDeviceNotificationReqEx(
+        adsPort_, &amsServer, paramInfo->hCallbackNotify);
+    adsUnlock();
+    if (delStatus) {
+      if (!blockErrorMsg) {
+        asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+                  "%s:%s: Delete device notification '%s' 0x%x failed with: %s "
+                  "(0x%lx)\n",
+                  driverName, functionName, paramInfo->plcAdrStr,
+                  paramInfo->hCallbackNotify, adsErrorToString(delStatus),
+                  delStatus);
+      }
+    } else {
+      asynPrint(pasynUserSelf, ASYN_TRACE_INFO,
+                "%s:%s: Delete device notification '%s' OK\n", driverName,
+                functionName, paramInfo->plcAdrStr);
     }
-  } else {
-    asynPrint(pasynUserSelf, ASYN_TRACE_INFO,
-              "%s:%s: Delete device notification '%s' OK\n", driverName,
-              functionName, paramInfo->plcAdrStr);
+    return delStatus ? asynError : asynSuccess;
   }
   paramInfo->bCallbackNotifyValid = false;
   paramInfo->hCallbackNotify = -1;
-
-  return delStatus ? asynError : asynSuccess;
+  return asynSuccess;
 }
 
 /** Get symbolic information for a plc variable.
