@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - master
-      - andre/gh-io-docs # remove this once validated
   pull_request:
   workflow_dispatch:
 
@@ -48,8 +47,7 @@ jobs:
 
   deploy:
     needs: build
-    # Change test-branch condition to master after GitHub Pages validation.
-    if: github.ref == 'refs/heads/andre/gh-io-docs' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
       pages: write
