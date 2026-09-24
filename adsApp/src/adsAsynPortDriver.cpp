@@ -306,7 +306,8 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
               asynFloat64ArrayMask | asynDrvUserMask | asynOctetMask |
               asynInt8ArrayMask | asynInt16ArrayMask |
               asynInt32ArrayMask, /* Interrupt mask */
-          ASYN_CANBLOCK, /* asynFlags.  This driver may block I/O thread excecution */
+          ASYN_CANBLOCK, /* asynFlags.  This driver may block I/O thread
+                            excecution */
           autoConnect,   /* Autoconnect */
           priority,      /* Default priority */
           0)             /* Default stack size*/

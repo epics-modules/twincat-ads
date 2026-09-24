@@ -38,6 +38,7 @@ configure/RELEASE_LIBS.local
 configure/RELEASE_PATHS.local*
 db/
 dbd/
+docs/_build/
 envPaths
 lib/
 .vscode/

@@ -1,0 +1,7 @@
+/* Extra styling for the Read the Docs theme. */
+
+/* Keep wide reference tables readable instead of clipping them. */
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+  white-space: normal;
+}

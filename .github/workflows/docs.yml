@@ -1,0 +1,63 @@
+# Build the Sphinx documentation and publish it on GitHub Pages.
+
+name: workflow-docs
+
+on:
+  push:
+    branches:
+      - master
+      - andre/gh-io-docs # remove this once validated
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: docs/requirements.txt
+
+      - name: install dependencies
+        run: pip install -r docs/requirements.txt
+
+      - name: build html
+        run: make -C docs html
+
+      - name: check external links
+        continue-on-error: true
+        run: make -C docs linkcheck
+
+      - name: upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_build/html
+
+  deploy:
+    needs: build
+    # Change test-branch condition to master after GitHub Pages validation.
+    if: github.ref == 'refs/heads/andre/gh-io-docs' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

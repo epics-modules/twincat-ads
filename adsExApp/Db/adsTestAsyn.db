@@ -115,7 +115,7 @@ record(ai,"$(P)GetFAmplitude"){
 # T_DLY_MS=500:  500ms max delay for data to be sent from PLC (buffers in max 500ms).
 # This could result in that 50 values (T_DLY_MS/TS_MS) are sent each 500ms
 # (depending on if other communication is filling the PLC AMS buffers or not).
-# For more information see docs/polling-or-ads-notifications.txt
+# For more information see docs/notifications-and-polling.md
 # One with timestamp from PLC and one with IOC (EPICS) timestamp
 
 record(ai,"$(P)GetFTestPLCTime"){
