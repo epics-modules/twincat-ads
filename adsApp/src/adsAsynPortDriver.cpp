@@ -306,8 +306,7 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
               asynFloat64ArrayMask | asynDrvUserMask | asynOctetMask |
               asynInt8ArrayMask | asynInt16ArrayMask |
               asynInt32ArrayMask, /* Interrupt mask */
-          ASYN_CANBLOCK, /* asynFlags.  This driver does not block and it is not
-                            multi-device, so flag is 0 */
+          ASYN_CANBLOCK, /* asynFlags.  This driver may block I/O thread excecution */
           autoConnect,   /* Autoconnect */
           priority,      /* Default priority */
           0)             /* Default stack size*/
@@ -5351,7 +5350,7 @@ static const iocshArg adsAsynPortDriverConfigureArg8 = {"max delay time ms",
 static const iocshArg adsAsynPortDriverConfigureArg9 = {
     "ADS communication timeout ms", iocshArgInt};
 static const iocshArg adsAsynPortDriverConfigureArg10 = {
-    "default time source (EPCIS=0,PLC=1)", iocshArgInt};
+    "default time source (PLC=0,EPICS=1)", iocshArgInt};
 static const iocshArg *adsAsynPortDriverConfigureArgs[] = {
     &adsAsynPortDriverConfigureArg0, &adsAsynPortDriverConfigureArg1,
     &adsAsynPortDriverConfigureArg2, &adsAsynPortDriverConfigureArg3,
