@@ -1,18 +1,22 @@
 # RELEASE NOTES
 
+## Release v2.2.1 (2026-08-06)
+
+- Handle the PLC reconnection properly, avoid exit()
+- Code cleanups: Remove author and history from source files (git log should be
+  used for that).
+- Use the `__FUNCTION__` macro
+
 ## Release v2.2.0 (2026-06-09)
 
-- New feature:
-  support for EPICS (long) strings via asynOctetRead/Write
+- New feature: support for EPICS (long) strings via asynOctetRead/Write
 
-- Bug fix:
-  Fix confusing/wrong value of reported bulk read time
+- Bug fix: Fix confusing/wrong value of reported bulk read time
 
-- Improvements:
-  Update Beckhoff-ADS 113.0.32-1 (the latest released version)
-  Reformat the code
-  Proper ci scripts
-  Various improvements in directory structiure, Makefiles...
+- Improvements: Update Beckhoff-ADS 113.0.32-1 (the latest released version)  
+  Reformat the code  
+  Proper ci scripts  
+  Various improvements in directory structure, Makefiles...
 
 ## Release v2.1.3 (2025-11-06)
 
