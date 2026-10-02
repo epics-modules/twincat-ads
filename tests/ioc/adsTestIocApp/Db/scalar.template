@@ -1,0 +1,13 @@
+# One input and one write-only output per PLC scalar Main.v$(T)
+
+record($(IN), "$(P)v$(T):Get") {
+    field(DTYP, "$(DTYP)")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.v$(T)?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+record($(OUT), "$(P)v$(T):Set") {
+    field(DTYP, "$(DTYP)")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.v$(T)=")
+}

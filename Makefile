@@ -54,6 +54,12 @@ cleanadssources:
 adsApp/src/ADS_FROM_BECKHOFF_SUPPORTSOURCES.mak: Makefile
 	${PWD}/tools/downloadADS.sh build ${ADS_FROM_BECKHOFF_SOURCES}
 
+# Integration tests: builds the test IOC in tests/ioc, needs tests/requirements.txt installed
+PYTHON ?= python3
+pytest: install
+	$(MAKE) -C tests/ioc
+	cd tests && $(PYTHON) -m pytest $(PYTEST_ARGS)
+
 include Makefile.epics
 
-.PHONY: checkws prepare clean cleanadssources
+.PHONY: checkws prepare clean cleanadssources pytest

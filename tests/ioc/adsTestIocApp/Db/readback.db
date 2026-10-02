@@ -1,0 +1,16 @@
+# Output records following the PLC value (info(asyn:READBACK)).
+# The test server clamps Main.fClamped* to [0, 100], like a PLC enforcing limits.
+
+record(ao, "$(P)Clamped:SetRB") {
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.fClamped?")
+    field(TSE,  "-2")
+    info(asyn:READBACK, "1")
+}
+
+record(ao, "$(P)ClampedPolled:SetRB") {
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/POLL_RATE=1.0/Main.fClampedPolled?")
+    field(TSE,  "-2")
+    info(asyn:READBACK, "1")
+}

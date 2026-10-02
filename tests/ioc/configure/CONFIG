@@ -1,0 +1,10 @@
+RULES = $(EPICS_BASE)
+
+include $(TOP)/configure/RELEASE
+
+CONFIG = $(RULES)/configure
+include $(CONFIG)/CONFIG
+
+INSTALL_LOCATION = $(TOP)
+
+include $(TOP)/configure/CONFIG_SITE

@@ -44,3 +44,13 @@ lib/
 .vscode/
 *.local
 .iocsh_history
+.venv/
+__pycache__/
+.pytest_cache/
+tests/logs/
+tests/ioc/bin/
+tests/ioc/lib/
+tests/ioc/db/
+tests/ioc/dbd/
+tests/ioc/**/O.*
+tests/ioc/iocBoot/*/envPaths

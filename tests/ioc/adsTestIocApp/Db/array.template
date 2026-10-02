@@ -1,0 +1,18 @@
+# Waveform input and write-only output per PLC array Main.a$(T) (10 elements)
+# NELM is larger than the PLC array on purpose: docs only require NELM >= elements
+
+record(waveform, "$(P)a$(T):Get") {
+    field(DTYP, "$(ATYPE)In")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.a$(T)?")
+    field(NELM, "20")
+    field(FTVL, "$(FTVL)")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+record(waveform, "$(P)a$(T):Set") {
+    field(DTYP, "$(ATYPE)Out")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.a$(T)=")
+    field(NELM, "20")
+    field(FTVL, "$(FTVL)")
+}

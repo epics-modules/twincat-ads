@@ -1,0 +1,1 @@
+include $(CONFIG)/RULES.ioc

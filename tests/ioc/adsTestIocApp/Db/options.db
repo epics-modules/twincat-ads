@@ -1,0 +1,51 @@
+# Link options: ADSPORT, TS_MS, T_DLY_MS, TIMEBASE
+
+record(ai, "$(P)Port852:Get") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=852/Main.fPort852?")
+    field(SCAN, "I/O Intr")
+}
+
+# Main.nCycleCounter changes every ms, so the sample time limits the update rate
+record(longin, "$(P)CycleCounter:Fast") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0,1)TIMEBASE=PLC/T_DLY_MS=500/TS_MS=10/ADSPORT=$(ADSPORT)/Main.nCycleCounter?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+record(longin, "$(P)CycleCounter:Slow") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0,1)TIMEBASE=PLC/T_DLY_MS=100/TS_MS=200/ADSPORT=$(ADSPORT)/Main.nCycleCounter?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+record(ai, "$(P)Timebase:Plc") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)TIMEBASE=PLC/ADSPORT=$(ADSPORT)/Main.fTimebase?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+record(ai, "$(P)Timebase:Epics") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)TIMEBASE=EPICS/ADSPORT=$(ADSPORT)/Main.fTimebase?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+# Falls back to argument 11 of adsAsynPortDriverConfigure
+record(ai, "$(P)Timebase:Default") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.fTimebase?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+# Without TSE=-2 the record timestamps itself
+record(ai, "$(P)Timebase:NoTse") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)TIMEBASE=PLC/ADSPORT=$(ADSPORT)/Main.fTimebase?")
+    field(SCAN, "I/O Intr")
+}
