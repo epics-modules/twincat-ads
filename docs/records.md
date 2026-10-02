@@ -119,11 +119,12 @@ The driver exposes the following asyn interfaces, so the matching `DTYP` values
 are available on both input and output (including `I/O Intr`):
 
 `asynInt32`, `asynInt64`, `asynFloat64`, `asynOctet`, `asynInt8Array`,
-`asynInt16Array`, `asynInt32Array`, `asynFloat32Array`, `asynFloat64Array`.
+`asynInt16Array`, `asynInt32Array`, `asynInt64Array`, `asynFloat32Array`,
+`asynFloat64Array`.
 
 ```{note}
-`asynInt64` is only compiled in when the EPICS base / asyn combination provides
-it (it is disabled by `NO_ADS_ASYN_ASYNPARAMINT64`).
+`asynInt64` and `asynInt64Array` are only compiled in when the EPICS base / asyn
+combination provides them (they can be disabled by `NO_ADS_ASYN_ASYNPARAMINT64`).
 ```
 
 ### Scalars
@@ -149,6 +150,7 @@ of PLC elements and `FTVL` must match the element type.
 | `BYTE`, `SINT`, `STRING` | `asynInt8ArrayIn` / `asynInt8ArrayOut`       | `CHAR`   |
 | `INT`, `WORD`            | `asynInt16ArrayIn` / `asynInt16ArrayOut`     | `SHORT`  |
 | `DINT`, `DWORD`          | `asynInt32ArrayIn` / `asynInt32ArrayOut`     | `LONG`   |
+| `LINT`, `ULINT`          | `asynInt64ArrayIn` / `asynInt64ArrayOut`     | `INT64`  |
 | `REAL`                   | `asynFloat32ArrayIn` / `asynFloat32ArrayOut` | `FLOAT`  |
 | `LREAL`                  | `asynFloat64ArrayIn` / `asynFloat64ArrayOut` | `DOUBLE` |
 
