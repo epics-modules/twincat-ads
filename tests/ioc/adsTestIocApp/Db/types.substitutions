@@ -1,0 +1,30 @@
+# Record types and DTYPs as documented in docs/records.md "Scalars"
+file "scalar.template" {
+    pattern { T,     IN,       OUT,       DTYP        }
+            { BOOL,  bi,       bo,        asynInt32   }
+            { SINT,  longin,   longout,   asynInt32   }
+            { USINT, longin,   longout,   asynInt32   }
+            { BYTE,  longin,   longout,   asynInt32   }
+            { INT,   longin,   longout,   asynInt32   }
+            { UINT,  longin,   longout,   asynInt32   }
+            { WORD,  longin,   longout,   asynInt32   }
+            { DINT,  longin,   longout,   asynInt32   }
+            { UDINT, longin,   longout,   asynInt32   }
+            { DWORD, longin,   longout,   asynInt32   }
+            { LINT,  int64in,  int64out,  asynInt64   }
+            { ULINT, int64in,  int64out,  asynInt64   }
+            { REAL,  ai,       ao,        asynFloat64 }
+            { LREAL, ai,       ao,        asynFloat64 }
+}
+
+# Array DTYPs and FTVLs as documented in docs/records.md "Arrays"
+file "array.template" {
+    pattern { T,     ATYPE,            FTVL   }
+            { SINT,  asynInt8Array,    CHAR   }
+            { INT,   asynInt16Array,   SHORT  }
+            { DINT,  asynInt32Array,   LONG   }
+            { LINT,  asynInt64Array,   INT64  }
+            { ULINT, asynInt64Array,   INT64  }
+            { REAL,  asynFloat32Array, FLOAT  }
+            { LREAL, asynFloat64Array, DOUBLE }
+}

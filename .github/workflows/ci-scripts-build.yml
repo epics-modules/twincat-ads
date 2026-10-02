@@ -4,9 +4,9 @@ name: twincat-ads
 on:
   push:
     paths-ignore:
-      - 'docs/*'
-      - '**/*.html'
-      - '**/*.md'
+      - "docs/*"
+      - "**/*.html"
+      - "**/*.md"
   pull_request:
 
 env:
@@ -47,19 +47,45 @@ jobs:
             name: "R7.0.9 MacOS latest"
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
 
-    - name: Prepare and compile dependencies
-      run: python .ci/cue.py prepare
+      - name: Prepare and compile dependencies
+        run: python .ci/cue.py prepare
 
-    - name: Build main module
-      run: python .ci/cue.py build
+      - name: Build main module
+        run: python .ci/cue.py build
 
-    - name: Run main module tests
-      run: python .ci/cue.py -T 15M test
+      - name: Run main module tests
+        run: python .ci/cue.py -T 15M test
 
-    - name: Collect and show test results
-      if: ${{ always() }}
-      run: python .ci/cue.py -T 5M test-results
+      - name: Collect and show test results
+        if: ${{ always() }}
+        run: python .ci/cue.py -T 5M test-results
+
+      - name: Set up Python for integration tests
+        if: runner.os == 'Linux'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build test IOC
+        if: runner.os == 'Linux'
+        run: make -C tests/ioc
+
+      - name: Install integration test dependencies
+        if: runner.os == 'Linux'
+        run: pip install -r tests/requirements.txt
+
+      - name: Run integration tests
+        if: runner.os == 'Linux'
+        working-directory: tests
+        run: python -m pytest -v --junitxml=logs/junit.xml
+
+      - name: Upload integration test logs
+        if: ${{ always() && runner.os == 'Linux' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-logs ${{ matrix.name }}
+          path: tests/logs/

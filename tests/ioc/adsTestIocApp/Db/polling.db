@@ -1,0 +1,29 @@
+# Bulk read (POLL_RATE) and EPICS-scanned records
+
+record(longin, "$(P)Polled:Get") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/POLL_RATE=1.0/Main.nPolled?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+# Main.nCycleCounter changes every ms, so every bulk read cycle yields an update
+record(longin, "$(P)CycleCounter:Polled") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/POLL_RATE=1.0/Main.nCycleCounter?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+record(longin, "$(P)CycleCounter:Polled200ms") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/POLL_RATE=0.2/Main.nCycleCounter?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+record(longin, "$(P)Scanned:Get") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.nScanned?")
+    field(SCAN, "1 second")
+}

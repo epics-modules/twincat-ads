@@ -1,0 +1,25 @@
+# Special symbols: .AMSPORTSTATE. and .ADR. absolute addressing
+
+record(longin, "$(P)AmsPortState:Get") {
+    field(DTYP, "asynInt32")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/.AMSPORTSTATE.?")
+    field(SCAN, "I/O Intr")
+    field(TSE,  "-2")
+}
+
+record(longout, "$(P)AmsPortState:Set") {
+    field(DTYP, "asynInt32")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/.AMSPORTSTATE.=")
+}
+
+# Main.fAbsolute lives at index group 0x4020, offset 0x10 (LREAL = ADST_REAL64 = 5)
+record(ai, "$(P)Absolute:Get") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/.ADR.16#4020,16#10,8,5?")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "$(P)Absolute:Set") {
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/.ADR.16#4020,16#10,8,5=")
+}

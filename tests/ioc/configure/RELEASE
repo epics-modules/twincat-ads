@@ -1,0 +1,8 @@
+# The test IOC uses twincat-ads like any downstream IOC would.
+
+# EPICS_BASE and ASYN come from the module's own RELEASE.local (written by ci-scripts in CI).
+
+TWINCAT_ADS = $(TOP)/../..
+
+-include $(TWINCAT_ADS)/configure/RELEASE.local 
+-include $(TOP)/configure/RELEASE.local

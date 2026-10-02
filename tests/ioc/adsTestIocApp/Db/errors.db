@@ -1,0 +1,21 @@
+# Links that must fail at record initialisation without taking the IOC down
+
+record(ai, "$(P)Error:MissingSymbol") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.doesNotExist?")
+    field(SCAN, "I/O Intr")
+}
+
+# Main.vLREAL only exists on port 851
+record(ai, "$(P)Error:WrongPort") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=852/Main.vLREAL?")
+    field(SCAN, "I/O Intr")
+}
+
+# The offset lacks the mandatory 16# prefix
+record(ai, "$(P)Error:MalformedAdr") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/.ADR.16#4020,10,8,5?")
+    field(SCAN, "I/O Intr")
+}

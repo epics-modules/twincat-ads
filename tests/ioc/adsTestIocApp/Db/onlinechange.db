@@ -1,0 +1,12 @@
+# Used to check that values keep flowing after an online change
+
+record(ai, "$(P)OnlineChange:Get") {
+    field(DTYP, "asynFloat64")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.fOnlineChange?")
+    field(SCAN, "I/O Intr")
+}
+
+record(ao, "$(P)OnlineChange:Set") {
+    field(DTYP, "asynFloat64")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.fOnlineChange=")
+}

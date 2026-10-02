@@ -1,0 +1,40 @@
+# Main.sString is a STRING(80), accessed in all documented ways
+
+record(stringin, "$(P)String:Get") {
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.sString?")
+    field(SCAN, "I/O Intr")
+}
+
+record(stringout, "$(P)String:Set") {
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.sString=")
+}
+
+record(lsi, "$(P)String:GetLong") {
+    field(DTYP, "asynOctetRead")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.sString?")
+    field(SIZV, "81")
+    field(SCAN, "I/O Intr")
+}
+
+record(lso, "$(P)String:SetLong") {
+    field(DTYP, "asynOctetWrite")
+    field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.sString=")
+    field(SIZV, "81")
+}
+
+record(waveform, "$(P)String:GetChars") {
+    field(DTYP, "asynInt8ArrayIn")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.sString?")
+    field(NELM, "81")
+    field(FTVL, "CHAR")
+    field(SCAN, "I/O Intr")
+}
+
+record(waveform, "$(P)String:SetChars") {
+    field(DTYP, "asynInt8ArrayOut")
+    field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT)/Main.sString=")
+    field(NELM, "81")
+    field(FTVL, "CHAR")
+}
