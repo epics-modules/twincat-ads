@@ -293,14 +293,14 @@ adsAsynPortDriver::adsAsynPortDriver(const char *portName, const char *ipaddr,
     : asynPortDriver(
           portName, 1, /* maxAddr */
 #ifndef NO_ADS_ASYN_ASYNPARAMINT64
-          asynInt64Mask |
+          asynInt64Mask | asynInt64ArrayMask |
 #endif
               asynInt32Mask | asynFloat64Mask | asynFloat32ArrayMask |
               asynFloat64ArrayMask | asynDrvUserMask | asynOctetMask |
               asynInt8ArrayMask | asynInt16ArrayMask |
               asynInt32ArrayMask, /* Interface mask */
 #ifndef NO_ADS_ASYN_ASYNPARAMINT64
-          asynInt64Mask |
+          asynInt64Mask | asynInt64ArrayMask |
 #endif
               asynInt32Mask | asynFloat64Mask | asynFloat32ArrayMask |
               asynFloat64ArrayMask | asynDrvUserMask | asynOctetMask |
@@ -2748,6 +2748,106 @@ asynStatus adsAsynPortDriver::writeInt32(asynUser *pasynUser,
   return asynPortDriver::writeInt32(pasynUser, value);
 }
 
+#ifndef NO_ADS_ASYN_ASYNPARAMINT64
+/** Overrides asynPortDriver::writeInt64.
+ * Writes int64 to PLC (LINT/ULINT). Based on pcdshub/twincat-ads#20.
+ * \param[in] pasynUser Pointer to asyn user structure
+ * \param[in] value Value to write.
+ *
+ * \return asynSuccess or asynError.
+ */
+asynStatus adsAsynPortDriver::writeInt64(asynUser *pasynUser,
+                                         epicsInt64 value) {
+  const char *functionName = __FUNCTION__;
+  asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
+  adsParamInfo *paramInfo;
+  int paramIndex = pasynUser->reason;
+
+  if (paramIndex < 0 || paramIndex >= adsParamArrayCount_ ||
+      !pAdsParamArray_[paramIndex]) {
+    asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s:%s: pAdsParamArray NULL\n",
+              driverName, functionName);
+    return asynError;
+  }
+
+  paramInfo = pAdsParamArray_[paramIndex];
+
+  // Special case. Check if write ams port state
+  if (paramInfo->dataSource == ADS_DATASOURCE_AMS_STATE) {
+    if (adsWriteState(paramInfo->amsPort, (uint16_t)value) != asynSuccess) {
+      return setAlarmParam(paramInfo, WRITE_ALARM, INVALID_ALARM);
+    }
+    // Write OK -> reset write alarm
+    if (paramInfo->alarmStatus == WRITE_ALARM) {
+      return setAlarmParam(paramInfo, NO_ALARM, NO_ALARM);
+    }
+    return asynSuccess;
+  }
+
+  uint8_t buffer[8]; // largest datatype is 8bytes
+  uint32_t maxBytesToWrite = 0;
+  // Convert epicsInt64 to plctype if possible..
+  switch (paramInfo->plcDataType) {
+  case ADST_INT64:
+    int64_t *ADST_INT64Var;
+    ADST_INT64Var = ((int64_t *)buffer);
+    *ADST_INT64Var = (int64_t)value;
+    maxBytesToWrite = 8;
+    break;
+  case ADST_UINT64:
+    uint64_t *ADST_UINT64Var;
+    ADST_UINT64Var = ((uint64_t *)buffer);
+    *ADST_UINT64Var = (uint64_t)value; // negative values wrap
+    maxBytesToWrite = 8;
+    break;
+  default:
+    asynPrint(pasynUser, ASYN_TRACE_ERROR,
+              "%s:%s: Data types not compatible (epicsInt64 and %s). Write "
+              "canceled.\n",
+              driverName, functionName,
+              adsTypeToString(paramInfo->plcDataType));
+    return asynError;
+    break;
+  }
+
+  // Warning. Risk of loss of data..
+  if (sizeof(value) > maxBytesToWrite || sizeof(value) > paramInfo->plcSize) {
+    asynPrint(pasynUser, ASYN_TRACE_WARNING,
+              "%s:%s: WARNING. EPICS datatype size larger than PLC datatype "
+              "size (%ld vs %d bytes).\n",
+              driverName, functionName, sizeof(value), paramInfo->plcSize);
+    paramInfo->plcDataTypeWarn = true;
+  }
+
+  // Ensure that PLC datatype and number of bytes to write match
+  if (maxBytesToWrite != paramInfo->plcSize || maxBytesToWrite == 0) {
+    asynPrint(
+        pasynUser, ASYN_TRACE_ERROR,
+        "%s:%s: Data types size mismatch (%s and %d bytes). Write canceled.\n",
+        driverName, functionName, adsTypeToString(paramInfo->plcDataType),
+        maxBytesToWrite);
+    setAlarmParam(paramInfo, WRITE_ALARM, INVALID_ALARM);
+    callParamCallbacks();
+    return asynError;
+  }
+
+  // Do the write
+  if (adsWriteParam(paramInfo, (const void *)buffer, maxBytesToWrite) !=
+      asynSuccess) {
+    setAlarmParam(paramInfo, WRITE_ALARM, INVALID_ALARM);
+    callParamCallbacks();
+    return asynError;
+  }
+
+  // Only reset if write alarm
+  if (paramInfo->alarmStatus == WRITE_ALARM) {
+    setAlarmParam(paramInfo, NO_ALARM, NO_ALARM);
+  }
+
+  return asynPortDriver::writeInt64(pasynUser, value);
+}
+#endif
+
 /** Overrides asynPortDriver::writeFloat64.
  * Writes float64 to PLC
  * \param[in] pasynUser Pointer to asyn user structure
@@ -2933,8 +3033,9 @@ asynStatus adsAsynPortDriver::adsGenericArrayRead(asynUser *pasynUser,
 
   adsParamInfo *paramInfo = pAdsParamArray_[paramIndex];
 
-  // Only support same datatype as in PLC
-  if (paramInfo->plcDataType != allowedType) {
+  // Only support same datatype as in PLC (ULINT is accessed as INT64)
+  if (paramInfo->plcDataType != allowedType &&
+      !(paramInfo->plcDataType == ADST_UINT64 && allowedType == ADST_INT64)) {
     asynPrint(pasynUser, ASYN_TRACE_ERROR,
               "%s:%s: Data types not compatible (%s vs %s). Read canceled.\n",
               driverName, functionName, adsTypeToString(paramInfo->plcDataType),
@@ -2999,8 +3100,9 @@ asynStatus adsAsynPortDriver::adsGenericArrayWrite(asynUser *pasynUser,
 
   adsParamInfo *paramInfo = pAdsParamArray_[paramIndex];
 
-  // Only support same datatype as in PLC
-  if (paramInfo->plcDataType != allowedType) {
+  // Only support same datatype as in PLC (ULINT is accessed as INT64)
+  if (paramInfo->plcDataType != allowedType &&
+      !(paramInfo->plcDataType == ADST_UINT64 && allowedType == ADST_INT64)) {
     asynPrint(pasynUser, ASYN_TRACE_ERROR,
               "%s:%s: Data types not compatible (%s vs %s). Write canceled.\n",
               driverName, functionName, adsTypeToString(paramInfo->plcDataType),
@@ -3244,6 +3346,55 @@ asynStatus adsAsynPortDriver::writeFloat32Array(asynUser *pasynUser,
   return adsGenericArrayWrite(pasynUser, allowedType, (const void *)value,
                               nElements * sizeof(epicsFloat32));
 }
+
+#ifndef NO_ADS_ASYN_ASYNPARAMINT64
+/** Overrides asynPortDriver::readInt64Array.
+ * Reads int64Array (LINT/ULINT). Based on pcdshub/twincat-ads#20.
+ * \param[in] pasynUser Pointer to asyn user structure
+ * \param[out] value Output data buffer.
+ * \param[in] nElements Output buffer size.
+ * \param[out] nIn Bytes read into buffer.
+ *
+ * \return asynSuccess or asynError.
+ */
+asynStatus adsAsynPortDriver::readInt64Array(asynUser *pasynUser,
+                                             epicsInt64 *value,
+                                             size_t nElements, size_t *nIn) {
+  const char *functionName = __FUNCTION__;
+  asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
+
+  long allowedType = ADST_INT64;
+
+  size_t nBytesRead = 0;
+  asynStatus stat =
+      adsGenericArrayRead(pasynUser, allowedType, (void *)value,
+                          nElements * sizeof(epicsInt64), &nBytesRead);
+  if (stat != asynSuccess) {
+    return asynError;
+  }
+  *nIn = nBytesRead / sizeof(epicsInt64);
+  return asynSuccess;
+}
+
+/** Overrides asynPortDriver::writeInt64Array.
+ * Writes int64Array (LINT/ULINT). Based on pcdshub/twincat-ads#20.
+ * \param[in] pasynUser Pointer to asyn user structure
+ * \param[in] value Input data buffer.
+ * \param[in] nElements Input data size.
+ *
+ * \return asynSuccess or asynError.
+ */
+asynStatus adsAsynPortDriver::writeInt64Array(asynUser *pasynUser,
+                                              epicsInt64 *value,
+                                              size_t nElements) {
+  const char *functionName = __FUNCTION__;
+  asynPrint(pasynUser, ASYN_TRACE_FLOW, "%s:%s:\n", driverName, functionName);
+
+  long allowedType = ADST_INT64;
+  return adsGenericArrayWrite(pasynUser, allowedType, (const void *)value,
+                              nElements * sizeof(epicsInt64));
+}
+#endif
 
 /** Overrides asynPortDriver::readFloat64Array.
  * Reads float64Array
@@ -4486,6 +4637,10 @@ asynStatus adsAsynPortDriver::adsUpdateParameter(adsParamInfo *paramInfo,
       ret = setInteger64Param(paramInfo->paramIndex,
                               (epicsInt64)(*ADST_INT64Var));
       break;
+    case asynParamInt64Array:
+      // handled in fireCallbacks()
+      ret = asynSuccess;
+      break;
 #endif
     case asynParamFloat64:
       ret = setDoubleParam(paramInfo->paramIndex, (double)(*ADST_INT64Var));
@@ -4600,11 +4755,14 @@ asynStatus adsAsynPortDriver::adsUpdateParameter(adsParamInfo *paramInfo,
       ret = setInteger64Param(paramInfo->paramIndex,
                               (epicsInt64)(*ADST_UINT64Var));
       break;
+    case asynParamInt64Array:
+      // handled in fireCallbacks()
+      ret = asynSuccess;
+      break;
 #endif
     case asynParamFloat64:
       ret = setDoubleParam(paramInfo->paramIndex, (double)(*ADST_UINT64Var));
       break;
-    // Arrays of unsigned not supported
     default:
       asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
                 "%s:%s: Type combination not supported. PLC type = %s, ASYN "
@@ -4849,6 +5007,30 @@ asynStatus adsAsynPortDriver::fireCallbacks(adsParamInfo *paramInfo) {
     }
     break;
 
+#ifndef NO_ADS_ASYN_ASYNPARAMINT64
+  // No unsigned 64 bit array callback in asyn, ULINT is passed as INT64
+  case ADST_INT64:
+  case ADST_UINT64:
+    switch (paramInfo->asynType) {
+    case asynParamInt64Array:
+      ret = doCallbacksInt64Array((epicsInt64 *)paramInfo->arrayDataBuffer,
+                                  paramInfo->lastCallbackSize /
+                                      sizeof(epicsInt64),
+                                  paramInfo->paramIndex, paramInfo->asynAddr);
+      break;
+    default:
+      asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
+                "%s:%s: Type combination not supported. PLC type = %s, ASYN "
+                "type= %s\n",
+                driverName, functionName,
+                adsTypeToString(paramInfo->plcDataType),
+                asynTypeToString(paramInfo->asynType));
+      return asynError;
+      break;
+    }
+    break;
+#endif
+
   case ADST_REAL32:
     switch (paramInfo->asynType) {
     case asynParamFloat32Array:
@@ -5046,6 +5228,13 @@ asynStatus adsAsynPortDriver::setAlarmParam(adsParamInfo *paramInfo, int alarm,
                                    writeSize / sizeof(epicsInt32),
                                    paramInfo->paramIndex, paramInfo->asynAddr);
       break;
+#ifndef NO_ADS_ASYN_ASYNPARAMINT64
+    case asynParamInt64Array:
+      stat = doCallbacksInt64Array((epicsInt64 *)paramInfo->arrayDataBuffer,
+                                   writeSize / sizeof(epicsInt64),
+                                   paramInfo->paramIndex, paramInfo->asynAddr);
+      break;
+#endif
     case asynParamFloat32Array:
       stat =
           doCallbacksFloat32Array((epicsFloat32 *)paramInfo->arrayDataBuffer,
