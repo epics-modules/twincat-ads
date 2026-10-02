@@ -1977,13 +1977,13 @@ bool adsAsynPortDriver::isCallbackAllowed(uint16_t amsPort) {
  *      Read a var on ams-port 851: "ADSPORT=851/Main.M1.fPosition?;"\n
  *  2. Symbolic write: "option1/option2/symbolicname=<value>;":\n
  *      Write to a var on ams-port 851: "ADSPORT=851/Main.M1.fPosition=10;"\n
- *  3: Abs address read: "option1/.ADR.16#<group>,<offset>,<size>,<type>?;"\n
+ *  3: Abs address read: "option1/.ADR.16#<group>,16#<offset>,<size>,<type>?;"\n
  *      Read low soflimit position in TwinCAT NC for axis 1:\n
- *      "ADSPORT=501/.ADR.16#5001,D,8,5?;"\n
+ *      "ADSPORT=501/.ADR.16#5001,16#D,8,5?;"\n
  *  4: Abs address write:
- * "option1/.ADR.16#<group>,<offset>,<size>,<type>=<value>;"\n Set low soflimit
- * position in TwinCAT NC for axis 1 to 100:\n
- *      "ADSPORT=501/.ADR.16#5001,D,8,5=100;"\n
+ * "option1/.ADR.16#<group>,16#<offset>,<size>,<type>=<value>;"\n Set low
+ * soflimit position in TwinCAT NC for axis 1 to 100:\n
+ *      "ADSPORT=501/.ADR.16#5001,16#D,8,5=100;"\n
  */
 asynStatus adsAsynPortDriver::readOctet(asynUser *pasynUser, char *value,
                                         size_t maxChars, size_t *nActual,

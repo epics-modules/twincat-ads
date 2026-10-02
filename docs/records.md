@@ -51,7 +51,7 @@ always be terminated by `/`.
 | Suffix | Behaviour                                                                                                                                              |
 | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `?`    | The driver reads the symbol. Used for input records, and for output records that should follow the PLC value — combine with `info(asyn:READBACK,"1")`. |
-| `=`    | Write only. The driver never reads the symbol back.                                                                                                    |
+| `=`    | Write only. The driver never reads the symbol back except for once on initialization.                                                                  |
 
 ### Options
 
@@ -78,7 +78,7 @@ single period (1 s), or the port default sample time when that is larger than
 
 Used instead of a PLC symbol to read or write the state of the AMS port itself.
 The value is maintained inside the driver, is of type `UINT16`, and always uses
-the EPICS timebase.
+the PLC timebase.
 
 ```
 record(mbbi, "$(P)AmsPortState") {
@@ -89,7 +89,14 @@ record(mbbi, "$(P)AmsPortState") {
 ```
 
 Writing to it issues an ADS write-control request, which can be used to
-start/stop the PLC runtime.
+start/stop the PLC runtime.  
+::: {warning}  
+Always load only one record with this symbol. The driver assigns only one asyn
+parameter to the AMS port-state symbol internally, so only the last record
+loaded will work.  
+If you need **read and write** access to the AMS port state, it is recommended
+to use **a single record** with `info(asyn:READBACK,"1")`.  
+:::
 
 #### `.ADR.` — absolute addressing
 
@@ -145,14 +152,20 @@ combination provides them (they can be disabled by `NO_ADS_ASYN_ASYNPARAMINT64`)
 PLC arrays are mapped to `waveform` records. `NELM` must be at least the number
 of PLC elements and `FTVL` must match the element type.
 
-| PLC element type         | `DTYP` (in / out)                            | `FTVL`   |
-| ------------------------ | -------------------------------------------- | -------- |
-| `BYTE`, `SINT`, `STRING` | `asynInt8ArrayIn` / `asynInt8ArrayOut`       | `CHAR`   |
-| `INT`, `WORD`            | `asynInt16ArrayIn` / `asynInt16ArrayOut`     | `SHORT`  |
-| `DINT`, `DWORD`          | `asynInt32ArrayIn` / `asynInt32ArrayOut`     | `LONG`   |
-| `LINT`, `ULINT`          | `asynInt64ArrayIn` / `asynInt64ArrayOut`     | `INT64`  |
-| `REAL`                   | `asynFloat32ArrayIn` / `asynFloat32ArrayOut` | `FLOAT`  |
-| `LREAL`                  | `asynFloat64ArrayIn` / `asynFloat64ArrayOut` | `DOUBLE` |
+| PLC element type | `DTYP` (in / out)                            | `FTVL`   |
+| ---------------- | -------------------------------------------- | -------- |
+| `SINT`, `STRING` | `asynInt8ArrayIn` / `asynInt8ArrayOut`       | `CHAR`   |
+| `INT`            | `asynInt16ArrayIn` / `asynInt16ArrayOut`     | `SHORT`  |
+| `DINT`           | `asynInt32ArrayIn` / `asynInt32ArrayOut`     | `LONG`   |
+| `LINT`, `ULINT`  | `asynInt64ArrayIn` / `asynInt64ArrayOut`     | `INT64`  |
+| `REAL`           | `asynFloat32ArrayIn` / `asynFloat32ArrayOut` | `FLOAT`  |
+| `LREAL`          | `asynFloat64ArrayIn` / `asynFloat64ArrayOut` | `DOUBLE` |
+
+```{note}
+Arrays of the unsigned types `BYTE`/`USINT`, `WORD`/`UINT` and `DWORD`/`UDINT`
+are not supported: the driver rejects them with an INVALID alarm. `ULINT` is
+the exception and is passed as signed 64-bit.
+```
 
 ```
 record(waveform,"$(P)GetFTestArray"){

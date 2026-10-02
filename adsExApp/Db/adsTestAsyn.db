@@ -168,7 +168,7 @@ record(bo,"$(P)SetBEnableUpdateSineRB"){
     info(asyn:READBACK,"1")
 }
 
-record(bo,"$(P)SetBEnableUpdateSineRB"){
+record(bo,"$(P)SetBEnableUpdateSineRBPoll"){
     field(PINI, "1")
     field(TSE,  "-2")
     field(DTYP, "asynInt32")
@@ -498,14 +498,15 @@ record(waveform, "$(P):Int32Array"){
 
 ###############################################################################
 # Ams port state: Read and write
-
+## Read-only
 record(ai,"$(P)GetAmsPort851State"){
     field(PINI, "1")
     field(DTYP, "asynInt32")
     field(INP,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/.AMSPORTSTATE.?")
     field(SCAN, "I/O Intr")
 }
-
+## Read and write.
+## Use one or the other - see https://epics-modules.github.io/twincat-ads/records.html#amsportstate
 record(ao,"$(P)SetAmsPort851State"){
     field(DTYP, "asynInt32")
     field(OUT,  "@asyn($(PORT),0,1)ADSPORT=$(ADSPORT=851)/.AMSPORTSTATE.?")
