@@ -3468,7 +3468,7 @@ asynStatus adsAsynPortDriver::writeFloat64Array(asynUser *pasynUser,
 
   long allowedType = ADST_REAL64;
   return adsGenericArrayWrite(pasynUser, allowedType, (const void *)value,
-                              nElements * nElements * sizeof(epicsFloat64));
+                              nElements * sizeof(epicsFloat64));
 }
 
 /** Returns pasynUserSelf for use in asynPrint().
@@ -5002,7 +5002,8 @@ asynStatus adsAsynPortDriver::fireCallbacks(adsParamInfo *paramInfo) {
     switch (paramInfo->asynType) {
     case asynParamInt16Array:
       ret = doCallbacksInt16Array((epicsInt16 *)paramInfo->arrayDataBuffer,
-                                  paramInfo->lastCallbackSize,
+                                  paramInfo->lastCallbackSize /
+                                      sizeof(epicsInt16),
                                   paramInfo->paramIndex, paramInfo->asynAddr);
       break;
     default:
@@ -5020,7 +5021,8 @@ asynStatus adsAsynPortDriver::fireCallbacks(adsParamInfo *paramInfo) {
     switch (paramInfo->asynType) {
     case asynParamInt32Array:
       ret = doCallbacksInt32Array((epicsInt32 *)paramInfo->arrayDataBuffer,
-                                  paramInfo->lastCallbackSize,
+                                  paramInfo->lastCallbackSize /
+                                      sizeof(epicsInt32),
                                   paramInfo->paramIndex, paramInfo->asynAddr);
       break;
     default:
@@ -5063,7 +5065,8 @@ asynStatus adsAsynPortDriver::fireCallbacks(adsParamInfo *paramInfo) {
     switch (paramInfo->asynType) {
     case asynParamFloat32Array:
       ret = doCallbacksFloat32Array((epicsFloat32 *)paramInfo->arrayDataBuffer,
-                                    paramInfo->lastCallbackSize,
+                                    paramInfo->lastCallbackSize /
+                                        sizeof(epicsFloat32),
                                     paramInfo->paramIndex, paramInfo->asynAddr);
       break;
     default:
@@ -5082,7 +5085,8 @@ asynStatus adsAsynPortDriver::fireCallbacks(adsParamInfo *paramInfo) {
     switch (paramInfo->asynType) {
     case asynParamFloat64Array:
       ret = doCallbacksFloat64Array((epicsFloat64 *)paramInfo->arrayDataBuffer,
-                                    paramInfo->lastCallbackSize,
+                                    paramInfo->lastCallbackSize /
+                                        sizeof(epicsFloat64),
                                     paramInfo->paramIndex, paramInfo->asynAddr);
       break;
     default:
