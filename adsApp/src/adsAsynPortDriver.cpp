@@ -512,18 +512,7 @@ adsAsynPortDriver::~adsAsynPortDriver() {
     }
     adsDelDataCallback(pAdsParamArray_[i], false);       // Block error messages
     adsReleaseSymbolicHandle(pAdsParamArray_[i], false); // Block error messages
-    free(pAdsParamArray_[i]->recordName);
-    free(pAdsParamArray_[i]->recordType);
-    free(pAdsParamArray_[i]->scan);
-    free(pAdsParamArray_[i]->dtyp);
-    free(pAdsParamArray_[i]->inp);
-    free(pAdsParamArray_[i]->out);
-    free(pAdsParamArray_[i]->drvInfo);
-    free(pAdsParamArray_[i]->plcAdrStr);
-    if (pAdsParamArray_[i]->plcDataIsArray) {
-      free(pAdsParamArray_[i]->arrayDataBuffer);
-    }
-    delete pAdsParamArray_[i];
+    freeParamInfo(pAdsParamArray_[i]);
   }
   free(ipaddr_);
   free(amsaddr_);
@@ -1190,6 +1179,7 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
 
   status = getRecordInfoFromDrvInfo(drvInfo, paramInfo);
   if (status != asynSuccess) {
+    freeParamInfo(paramInfo);
     return asynError;
   }
 
@@ -1198,6 +1188,7 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
   if (status != asynSuccess) {
     asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s:%s: getAddress() failed.",
               driverName, functionName);
+    freeParamInfo(paramInfo);
     return (status);
   }
 
@@ -1206,6 +1197,7 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
   // Everything that can reject the drvInfo must run before createParam()
   status = parsePlcInfofromDrvInfo(drvInfo, paramInfo);
   if (status != asynSuccess) {
+    freeParamInfo(paramInfo);
     return asynError;
   }
 
@@ -1213,6 +1205,7 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
   if (status != asynSuccess) {
     asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s:%s: createParam() failed.",
               driverName, functionName);
+    freeParamInfo(paramInfo);
     return asynError;
   }
   asynPrint(pasynUser, ASYN_TRACE_INFO,
@@ -1224,6 +1217,7 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
               "%s:%s: Parameter index %d out of sync with parameter count %d "
               "(drvInfo=%s).\n",
               driverName, functionName, index, adsParamArrayCount_, drvInfo);
+    freeParamInfo(paramInfo);
     return asynError;
   }
 
@@ -1266,6 +1260,28 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
   }
   return asynPortDriver::drvUserCreate(pasynUser, drvInfo, pptypeName,
                                        psize); // Assigns pasynUser->reason;
+}
+
+/** Free a parameter information structure and the memory it owns.
+ * \param[in] paramInfo Parameter information structure.
+ */
+void adsAsynPortDriver::freeParamInfo(adsParamInfo *paramInfo) {
+  // An .AMSPORTSTATE. parameter is also referenced by its ams-port
+  for (amsPortInfo *port : amsPortList_) {
+    if (port->paramInfo == paramInfo) {
+      port->paramInfo = NULL;
+    }
+  }
+  free(paramInfo->recordName);
+  free(paramInfo->recordType);
+  free(paramInfo->scan);
+  free(paramInfo->dtyp);
+  free(paramInfo->inp);
+  free(paramInfo->out);
+  free(paramInfo->drvInfo);
+  free(paramInfo->plcAdrStr);
+  free(paramInfo->arrayDataBuffer);
+  delete paramInfo;
 }
 
 /** Update parameter with info from PLC (variable size, type and abs addr).
