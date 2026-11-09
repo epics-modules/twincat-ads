@@ -1193,6 +1193,22 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
     return asynError;
   }
 
+  int addr = 0;
+  status = getAddress(pasynUser, &addr);
+  if (status != asynSuccess) {
+    asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s:%s: getAddress() failed.",
+              driverName, functionName);
+    return (status);
+  }
+
+  paramInfo->asynAddr = addr;
+
+  // Everything that can reject the drvInfo must run before createParam()
+  status = parsePlcInfofromDrvInfo(drvInfo, paramInfo);
+  if (status != asynSuccess) {
+    return asynError;
+  }
+
   status = createParam(drvInfo, paramInfo->asynType, &index);
   if (status != asynSuccess) {
     asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s:%s: createParam() failed.",
@@ -1202,6 +1218,14 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
   asynPrint(pasynUser, ASYN_TRACE_INFO,
             "%s:%s: Parameter created: \"%s\" (index %d).\n", driverName,
             functionName, drvInfo, index);
+
+  if (index != adsParamArrayCount_) {
+    asynPrint(pasynUser, ASYN_TRACE_ERROR,
+              "%s:%s: Parameter index %d out of sync with parameter count %d "
+              "(drvInfo=%s).\n",
+              driverName, functionName, index, adsParamArrayCount_, drvInfo);
+    return asynError;
+  }
 
   // Set default value for basic types...
   switch (paramInfo->asynType) {
@@ -1221,21 +1245,6 @@ asynStatus adsAsynPortDriver::drvUserCreate(asynUser *pasynUser,
   }
 
   paramInfo->paramIndex = index;
-
-  int addr = 0;
-  status = getAddress(pasynUser, &addr);
-  if (status != asynSuccess) {
-    asynPrint(pasynUser, ASYN_TRACE_ERROR, "%s:%s: getAddress() failed.",
-              driverName, functionName);
-    return (status);
-  }
-
-  paramInfo->asynAddr = addr;
-
-  status = parsePlcInfofromDrvInfo(drvInfo, paramInfo);
-  if (status != asynSuccess) {
-    return asynError;
-  }
   pasynUser->timeout = (paramInfo->maxDelayTimeMS * 2) / 1000;
 
   pAdsParamArray_[adsParamArrayCount_] = paramInfo;
