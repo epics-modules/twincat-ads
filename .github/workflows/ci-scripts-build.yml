@@ -4,9 +4,9 @@ name: twincat-ads
 on:
   push:
     paths-ignore:
-      - 'docs/*'
-      - '**/*.html'
-      - '**/*.md'
+      - "docs/*"
+      - "**/*.html"
+      - "**/*.md"
   pull_request:
 
 env:
@@ -31,35 +31,35 @@ jobs:
           - os: ubuntu-latest
             cmp: gcc
             configuration: default
-            base: "R7.0.9"
-            name: "7.0.9 Ubuntu latest"
+            base: "R7.0.11"
+            name: "7.0.11 Ubuntu latest"
 
           - os: ubuntu-22.04
             cmp: gcc
             configuration: default
-            base: "R7.0.9"
-            name: "7.0.9 Ubuntu 22.04"
+            base: "R7.0.11"
+            name: "7.0.11 Ubuntu 22.04"
 
           - os: macos-latest
             cmp: gcc
-            base: "R7.0.9"
+            base: "R7.0.11"
             configuration: default
-            name: "R7.0.9 MacOS latest"
+            name: "R7.0.11 MacOS latest"
 
     steps:
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
 
-    - name: Prepare and compile dependencies
-      run: python .ci/cue.py prepare
+      - name: Prepare and compile dependencies
+        run: python .ci/cue.py prepare
 
-    - name: Build main module
-      run: python .ci/cue.py build
+      - name: Build main module
+        run: python .ci/cue.py build
 
-    - name: Run main module tests
-      run: python .ci/cue.py -T 15M test
+      - name: Run main module tests
+        run: python .ci/cue.py -T 15M test
 
-    - name: Collect and show test results
-      if: ${{ always() }}
-      run: python .ci/cue.py -T 5M test-results
+      - name: Collect and show test results
+        if: ${{ always() }}
+        run: python .ci/cue.py -T 5M test-results
