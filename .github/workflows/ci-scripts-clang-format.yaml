@@ -17,11 +17,9 @@ jobs:
 
       - name: install and run clang format
         run: |
-            sudo apt-get install git || :
-            sudo apt-get install pip3 || :
-            sudo apt-get install python3-pip || :
-            sudo pip install pre-commit
-            pre-commit run --all-files
+          python3 -m venv "$RUNNER_TEMP/pre-commit-venv"
+          "$RUNNER_TEMP/pre-commit-venv/bin/python" -m pip install pre-commit
+          "$RUNNER_TEMP/pre-commit-venv/bin/pre-commit" run --all-files
 
       - name: check whitespace damage
         run: |
