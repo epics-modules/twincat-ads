@@ -2741,8 +2741,9 @@ asynStatus adsAsynPortDriver::writeInt32(asynUser *pasynUser,
   if (sizeof(value) > maxBytesToWrite || sizeof(value) > paramInfo->plcSize) {
     asynPrint(pasynUser, ASYN_TRACE_WARNING,
               "%s:%s: WARNING. EPICS datatype size larger than PLC datatype "
-              "size (%ld vs %d bytes).\n",
-              driverName, functionName, sizeof(value), paramInfo->plcDataType);
+              "size (%zu vs %u bytes, PLC type %s).\n",
+              driverName, functionName, sizeof(value), paramInfo->plcSize,
+              adsTypeToString(paramInfo->plcDataType));
     paramInfo->plcDataTypeWarn = true;
   }
 
@@ -2892,8 +2893,9 @@ asynStatus adsAsynPortDriver::writeFloat64(asynUser *pasynUser,
   if (sizeof(value) > maxBytesToWrite || sizeof(value) > paramInfo->plcSize) {
     asynPrint(pasynUser, ASYN_TRACE_WARNING,
               "%s:%s: WARNING. EPICS datatype size larger than PLC datatype "
-              "size (%ld vs %d bytes).\n",
-              driverName, functionName, sizeof(value), paramInfo->plcDataType);
+              "size (%zu vs %u bytes, PLC type %s).\n",
+              driverName, functionName, sizeof(value), paramInfo->plcSize,
+              adsTypeToString(paramInfo->plcDataType));
     paramInfo->plcDataTypeWarn = true;
   }
 
