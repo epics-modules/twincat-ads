@@ -50,6 +50,13 @@ public:
                                size_t maxChars, size_t *nActual,
                                int *eomReason);
   virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+#ifndef NO_ADS_ASYN_ASYNPARAMINT64
+  virtual asynStatus writeInt64(asynUser *pasynUser, epicsInt64 value);
+  virtual asynStatus readInt64Array(asynUser *pasynUser, epicsInt64 *value,
+                                    size_t nElements, size_t *nIn);
+  virtual asynStatus writeInt64Array(asynUser *pasynUser, epicsInt64 *value,
+                                     size_t nElements);
+#endif
   virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
   virtual asynStatus readInt8Array(asynUser *pasynUser, epicsInt8 *value,
                                    size_t nElements, size_t *nIn);
